@@ -64,3 +64,11 @@ will follow up for discovery and revisit plan
 
 Output: Assistant: We convened to discuss the project requirements. The customer expects the project to be completed within 60 days. They expressed concerns regarding the current adoption strategy, particularly in relation to participant geography. It was noted that the customer has numerous global teams that need to be considered. We will conduct a follow-up discovery session and subsequently revisit the project plan.
 ```
+
+
+##### 🧑‍🤝‍🧑❓ Discussion Question #1:
+
+What are some limitations of vibe checking as an evaluation tool?
+Some limitations include:
+- scalability: it may be difficult to vibecheck a system with lots of features or use it as a tool to validate a solution going into production. Seems good for early validation
+- manual: may be difficult to do consistently over time with subsequent versions of an application being released
