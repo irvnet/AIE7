@@ -47,15 +47,10 @@ Response:
 - Aspect Tested: content creation
 - Observation: good outcome for provided output, fast results relative to other questions
 
-```
-Input: we met and discussed project
-customer wants project to complete in 60 days
-customer has concerns about current adoption strategy based on participate geography
-learned customer has lots global teams that needs to be addressed
-will follow up for discovery and revisit plan
+> Input: we met and discussed project. customer wants project to complete in 60 days. customer has concerns about current adoption strategy based on participate geography
+learned customer has lots global teams that needs to be addressed.  will follow up for discovery and revisit plan
 
-Output: Assistant: We convened to discuss the project requirements. The customer expects the project to be completed within 60 days. They expressed concerns regarding the current adoption strategy, particularly in relation to participant geography. It was noted that the customer has numerous global teams that need to be considered. We will conduct a follow-up discovery session and subsequently revisit the project plan.
-```
+> Output: Assistant: We convened to discuss the project requirements. The customer expects the project to be completed within 60 days. They expressed concerns regarding the current adoption strategy, particularly in relation to participant geography. It was noted that the customer has numerous global teams that need to be considered. We will conduct a follow-up discovery session and subsequently revisit the project plan.
 
 
 ##### 🧑‍🤝‍🧑❓ Discussion Question #1:
