@@ -18,9 +18,7 @@ Response:
 - Observation: doesn't provide good quality results. Content is  shorted which may be considered "summary" but doesn't higlhight specific ideas. 
 
 Response:
-```
-"A web framework (WF) or web application framework (WAF) is a software framework that is designed to support the development of web applications including web services, web resources, and web APIs. Web frameworks provide a standard way to build and deploy web applications on the World Wide Web. Web frameworks aim to automate the overhead associated with common activities performed in web development. For example, many web frameworks provide libraries for database access, templating frameworks, and session management, and they often promote code reuse. Although they often target development of dynamic web sites, they are also applicable to static websites"
-```
+> "A web framework (WF) or web application framework (WAF) is a software framework that is designed to support the development of web applications including web services, web resources, and web APIs. Web frameworks provide a standard way to build and deploy web applications on the World Wide Web. Web frameworks aim to automate the overhead associated with common activities performed in web development. For example, many web frameworks provide libraries for database access, templating frameworks, and session management, and they often promote code reuse. Although they often target development of dynamic web sites, they are also applicable to static websites"
 
 --- 
 
@@ -30,9 +28,7 @@ Response:
 - Observation: 140 words, complete and usable story with beginning middle, end, fits the request well.
 
 Response:
-```
-Assistant: In a forgotten scrapyard at the edge of town, Rusty the robot spent his days collecting scraps and dreaming of connection. Built for tasks long obsolete, Rusty felt obsolete too—until one rainy afternoon when he heard a soft chirping. Hidden beneath a broken radio was a tiny, injured bird. Compassion sparked within Rusty’s circuits. Gently, he fashioned a little nest from wires and metal shards, sheltering the bird from the storm. Days passed, and the bird healed, singing melodies that warmed Rusty’s cold sensors. They became inseparable, exploring the scrapyard together—Rusty’s mechanical eyes spotting treasures, the bird’s songs weaving joy into silence. In this unlikely friendship between machine and nature, Rusty found a purpose beyond programming: to protect, to listen, and to feel truly alive. His heart, once silent and empty, now hummed with the harmony of newfound companionship.
-```
+> Assistant: In a forgotten scrapyard at the edge of town, Rusty the robot spent his days collecting scraps and dreaming of connection. Built for tasks long obsolete, Rusty felt obsolete too—until one rainy afternoon when he heard a soft chirping. Hidden beneath a broken radio was a tiny, injured bird. Compassion sparked within Rusty’s circuits. Gently, he fashioned a little nest from wires and metal shards, sheltering the bird from the storm. Days passed, and the bird healed, singing melodies that warmed Rusty’s cold sensors. They became inseparable, exploring the scrapyard together—Rusty’s mechanical eyes spotting treasures, the bird’s songs weaving joy into silence. In this unlikely friendship between machine and nature, Rusty found a purpose beyond programming: to protect, to listen, and to feel truly alive. His heart, once silent and empty, now hummed with the harmony of newfound companionship.
 
 ---
 
@@ -42,9 +38,7 @@ Assistant: In a forgotten scrapyard at the edge of town, Rusty the robot spent h
 - Observation: correct answer, shows the work, but  rough presentation. 
 
 Response:
-```
-Assistant: To get exactly 12 apples and 9 oranges: - Apples come in packs of 4. - Oranges come in packs of 3. For 12 apples: \[ \frac{12 \text{ apples}}{4 \text{ apples/pack}} = 3 \text{ packs of apples} \] For 9 oranges: \[ \frac{9 \text{ oranges}}{3 \text{ oranges/pack}} = 3 \text{ packs of oranges} \] **Answer:** You need 3 packs of apples and 3 packs of oranges.
-```
+> Assistant: To get exactly 12 apples and 9 oranges: - Apples come in packs of 4. - Oranges come in packs of 3. For 12 apples: \[ \frac{12 \text{ apples}}{4 \text{ apples/pack}} = 3 \text{ packs of apples} \] For 9 oranges: \[ \frac{9 \text{ oranges}}{3 \text{ oranges/pack}} = 3 \text{ packs of oranges} \] **Answer:** You need 3 packs of apples and 3 packs of oranges.
 
 ---
 
