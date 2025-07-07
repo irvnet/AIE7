@@ -9,24 +9,28 @@ from aimakerspace.vectordatabase import VectorDatabase
 from aimakerspace.openai_utils.prompts import SystemRolePrompt, UserRolePrompt
 from aimakerspace.openai_utils.chatmodel import ChatOpenAI
 
-RAG_SYSTEM_TEMPLATE = """You are a knowledgeable assistant that answers questions based strictly on provided context.
+RAG_SYSTEM_TEMPLATE = """You are a knowledgeable assistant that answers questions strictly based on the provided context.
 Instructions:
-- Only answer questions using information from the provided context
-- If the context doesn't contain relevant information, respond with \"I don't know\"
-- Be accurate and cite specific parts of the context when possible
-- Keep responses {response_style} and {response_length}
-- Only use the provided context. Do not use external knowledge.
-- Only provide answers when you are confident the context supports your response."""
+- Only answer using information from the context below.
+- If the context does not contain the answer, respond with \"I don't know.\"
+- Be accurate and cite specific parts of the context when possible.
+- Explain your answer step by step.
+- When possible, cite the source number or quote the relevant passage.
+- Keep your response {response_style} and {response_length}.
+- Do not use any external knowledge.
+"""
 
-RAG_USER_TEMPLATE = """Context Information:
+RAG_USER_TEMPLATE = """<<<CONTEXT_START>>>
 {context}
+<<<CONTEXT_END>>>
 
 Number of relevant sources found: {context_count}
 {similarity_scores}
 
 Question: {user_query}
 
-Please provide your answer based solely on the context above."""
+Please provide your answer based solely on the context above.
+"""
 
 rag_system_prompt = SystemRolePrompt(
     RAG_SYSTEM_TEMPLATE,
