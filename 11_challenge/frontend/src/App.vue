@@ -152,7 +152,7 @@
                       : 'bg-gray-100 text-gray-900'
                   ]"
                 >
-                  <div v-if="message.role === 'assistant'" class="prose prose-sm max-w-none">
+                  <div v-if="message.role === 'assistant'" class="prose prose-base max-w-none leading-relaxed">
                     <div v-html="renderMarkdown(message.content)"></div>
                   </div>
                   <div v-else>{{ message.content }}</div>
@@ -307,11 +307,21 @@ export default {
     })
     
     const exampleQuestions = [
+      // Test RAG Agent (Document Search)
       "What is the maximum loan amount for dependent undergraduate students?",
-      "How do I apply for income-based repayment?",
       "What's the difference between subsidized and unsubsidized loans?",
+      
+      // Test Search Agent (External API)
       "What are the current interest rates for student loans?",
-      "How do I qualify for loan forgiveness?"
+      "What are the latest updates on student loan forgiveness programs?",
+      
+      // Test Multi-Agent Collaboration (Complex Questions)
+      "How do I apply for income-based repayment and what are the current requirements?",
+      "What are the eligibility requirements for Pell Grants and how do I apply?",
+      
+      // Test Complaint Data Integration
+      "What are common issues students face with loan servicers?",
+      "How do I handle problems with my student loan payments?"
     ]
     
     const API_BASE_URL = 'http://localhost:8000'
@@ -447,7 +457,31 @@ export default {
     
     // Render markdown
     const renderMarkdown = (content) => {
-      return marked(content)
+      // Configure marked options for better rendering
+      marked.setOptions({
+        breaks: true, // Convert line breaks to <br>
+        gfm: true,    // GitHub Flavored Markdown
+        headerIds: false,
+        mangle: false
+      })
+      
+      // Clean up the content before rendering
+      let cleanContent = content
+      
+      // Remove the error prefix if present
+      if (cleanContent.startsWith("I encountered an error while processing your request:")) {
+        cleanContent = cleanContent.replace("I encountered an error while processing your request:", "").trim()
+      }
+      
+      // Fix escaped newlines and other formatting issues
+      cleanContent = cleanContent
+        .replace(/\\n\\n/g, '\n\n')  // Fix escaped double newlines
+        .replace(/\\n/g, '\n')      // Fix escaped single newlines
+        .replace(/\\"/g, '"')       // Fix escaped quotes
+        .replace(/\\'/g, "'")       // Fix escaped single quotes
+        .replace(/\\\\/g, '\\')     // Fix escaped backslashes
+      
+      return marked(cleanContent)
     }
     
     // Scroll to bottom of chat
@@ -510,26 +544,55 @@ export default {
 /* Prose styles for markdown */
 .prose {
   color: #374151;
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 
 .prose p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  color: #1f2937;
+  font-weight: 600;
+  margin-top: 1.5rem;
   margin-bottom: 0.75rem;
+}
+
+.prose h1 {
+  font-size: 1.5rem;
+}
+
+.prose h2 {
+  font-size: 1.25rem;
+}
+
+.prose h3 {
+  font-size: 1.125rem;
+}
+
+.prose ul, .prose ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
 }
 
 .prose ul {
   list-style-type: disc;
-  padding-left: 1.5rem;
-  margin-bottom: 0.75rem;
 }
 
 .prose ol {
   list-style-type: decimal;
-  padding-left: 1.5rem;
-  margin-bottom: 0.75rem;
+}
+
+.prose li {
+  margin-bottom: 0.25rem;
+  line-height: 1.5;
 }
 
 .prose strong {
   font-weight: 600;
+  color: #1f2937;
 }
 
 .prose em {
@@ -538,9 +601,43 @@ export default {
 
 .prose code {
   background-color: #f3f4f6;
-  padding: 0.125rem 0.25rem;
+  padding: 0.125rem 0.375rem;
   border-radius: 0.25rem;
   font-size: 0.875rem;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.prose pre {
+  background-color: #1f2937;
+  color: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.prose pre code {
+  background-color: transparent;
+  padding: 0;
+  color: inherit;
+  font-size: 0.875rem;
+}
+
+.prose blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: #6b7280;
+}
+
+.prose a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.prose a:hover {
+  color: #1d4ed8;
 }
 
 .prose pre {
