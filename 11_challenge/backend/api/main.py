@@ -106,12 +106,14 @@ async def initialize_system(request: InitializeRequest):
     """Initialize the RAG system with API keys"""
     try:
         # Broadcast initialization start
-        await manager.broadcast(json.dumps({
+        progress_message = json.dumps({
             "type": "initialization_progress",
             "step": "start",
             "message": "Starting system initialization...",
             "progress": 0
-        }))
+        })
+        print(f"Broadcasting progress: {progress_message}")
+        await manager.broadcast(progress_message)
         
         # Set environment variables
         os.environ["OPENAI_API_KEY"] = request.openai_api_key

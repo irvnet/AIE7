@@ -337,6 +337,7 @@ export default {
           scrollToBottom()
         } else if (data.type === 'initialization_progress') {
           // Handle initialization progress
+          console.log('Received progress update:', data)
           initializationProgress.value = data.progress
           initializationMessage.value = data.message
           showInitializationProgress.value = true
@@ -408,6 +409,12 @@ export default {
     const initializeSystem = async () => {
       initializing.value = true
       
+      // Hide modal immediately so user can see progress
+      showConfig.value = false
+      
+      // Initialize WebSocket first to receive progress updates
+      initWebSocket()
+      
       try {
         const response = await axios.post(`${API_BASE_URL}/initialize`, {
           openai_api_key: config.openaiApiKey,
@@ -416,13 +423,13 @@ export default {
         
         if (response.data.success) {
           systemStatus.initialized = true
-          showConfig.value = false
           await fetchSystemStatus()
-          initWebSocket()
         }
       } catch (error) {
         console.error('Initialization failed:', error)
         alert('Failed to initialize system. Please check your API keys.')
+        // Show modal again if initialization fails
+        showConfig.value = true
       } finally {
         initializing.value = false
       }
