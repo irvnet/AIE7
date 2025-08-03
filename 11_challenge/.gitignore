@@ -134,6 +134,7 @@ dmypy.json
 cython_debug/
 
 # Project-specific
+temp/
 example-code/
 *.log
 .env.local
