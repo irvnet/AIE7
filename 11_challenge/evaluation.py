@@ -37,8 +37,9 @@ class TestCase:
 class EnhancedRAGASEvaluator:
     """Enhanced RAGAS-based evaluator for the multi-agent student loan assistant"""
     
-    def __init__(self, openai_api_key: str):
+    def __init__(self, openai_api_key: str, use_advanced_retrieval: bool = True):
         self.openai_api_key = openai_api_key
+        self.use_advanced_retrieval = use_advanced_retrieval
         self.llm = ChatOpenAI(model="gpt-4o-mini", api_key=openai_api_key)
         self.embedding_model = OpenAIEmbeddings(model="text-embedding-3-small", api_key=openai_api_key)
         self.test_cases = []
@@ -438,11 +439,12 @@ class EnhancedRAGASEvaluator:
             except:
                 complaint_retriever = None
             
-            # Initialize multi-agent system
+            # Initialize multi-agent system with advanced retrieval option
             self.multi_agent_system = MultiAgentSystem(
                 rag_retriever=rag_retriever,
                 complaint_retriever=complaint_retriever,
-                tavily_api_key=os.getenv("TAVILY_API_KEY")
+                tavily_api_key=os.getenv("TAVILY_API_KEY"),
+                use_advanced_retrieval=self.use_advanced_retrieval
             )
             
             print("Multi-agent system initialized successfully")
@@ -488,41 +490,84 @@ def main():
     else:
         print("Using OpenAI API key from environment variable")
     
-    # Run evaluation
-    evaluator = EnhancedRAGASEvaluator(openai_key)
-    results = evaluator.run_evaluation()
-    
-    # Print results
+    # Run evaluation with advanced retrieval
     print("\n" + "="*60)
-    print("ENHANCED RAGAS EVALUATION RESULTS")
+    print("EVALUATING WITH ADVANCED RETRIEVAL")
     print("="*60)
+    evaluator_advanced = EnhancedRAGASEvaluator(openai_key, use_advanced_retrieval=True)
+    results_advanced = evaluator_advanced.run_evaluation()
     
-    print("\nStandard RAGAS Metrics:")
+    # Run evaluation with baseline retrieval
+    print("\n" + "="*60)
+    print("EVALUATING WITH BASELINE RETRIEVAL")
+    print("="*60)
+    evaluator_baseline = EnhancedRAGASEvaluator(openai_key, use_advanced_retrieval=False)
+    results_baseline = evaluator_baseline.run_evaluation()
+    
+    # Print comparison results
+    print("\n" + "="*80)
+    print("PERFORMANCE COMPARISON: BASELINE vs ADVANCED RETRIEVAL")
+    print("="*80)
+    
+    print("\nStandard RAGAS Metrics Comparison:")
+    print(f"{'Metric':<25} {'Baseline':<12} {'Advanced':<12} {'Improvement':<12}")
+    print("-" * 65)
     standard_metrics = ["faithfulness", "relevance", "context_precision", "context_recall"]
     for metric in standard_metrics:
-        if metric in results["aggregate_metrics"]:
-            print(f"{metric.capitalize()}: {results['aggregate_metrics'][metric]:.3f}")
+        baseline_score = results_baseline["aggregate_metrics"].get(metric, 0.0)
+        advanced_score = results_advanced["aggregate_metrics"].get(metric, 0.0)
+        improvement = advanced_score - baseline_score
+        improvement_str = f"+{improvement:.3f}" if improvement > 0 else f"{improvement:.3f}"
+        print(f"{metric.capitalize():<25} {baseline_score:<12.3f} {advanced_score:<12.3f} {improvement_str:<12}")
     
-    print("\nAgent-Specific Metrics:")
+    print("\nAgent-Specific Metrics Comparison:")
+    print(f"{'Metric':<25} {'Baseline':<12} {'Advanced':<12} {'Improvement':<12}")
+    print("-" * 65)
     agent_metrics = ["tool_call_accuracy", "agent_goal_accuracy", "multi_agent_coordination"]
     for metric in agent_metrics:
-        if metric in results["aggregate_metrics"]:
-            print(f"{metric.capitalize()}: {results['aggregate_metrics'][metric]:.3f}")
+        baseline_score = results_baseline["aggregate_metrics"].get(metric, 0.0)
+        advanced_score = results_advanced["aggregate_metrics"].get(metric, 0.0)
+        improvement = advanced_score - baseline_score
+        improvement_str = f"+{improvement:.3f}" if improvement > 0 else f"{improvement:.3f}"
+        print(f"{metric.capitalize():<25} {baseline_score:<12.3f} {advanced_score:<12.3f} {improvement_str:<12}")
     
-    print(f"\nOverall Score: {results['aggregate_metrics']['overall_score']:.3f}")
+    print(f"\nOverall Score Comparison:")
+    baseline_overall = results_baseline["aggregate_metrics"].get("overall_score", 0.0)
+    advanced_overall = results_advanced["aggregate_metrics"].get("overall_score", 0.0)
+    overall_improvement = advanced_overall - baseline_overall
+    improvement_str = f"+{overall_improvement:.3f}" if overall_improvement > 0 else f"{overall_improvement:.3f}"
+    print(f"Baseline: {baseline_overall:.3f}")
+    print(f"Advanced: {advanced_overall:.3f}")
+    print(f"Improvement: {improvement_str}")
     
-    print("\nResults by Category:")
-    for category, metrics in results["results_by_category"].items():
-        print(f"\n{category.upper()}:")
-        for metric, score in metrics.items():
-            print(f"  {metric}: {score:.3f}")
+    # Save detailed results for both systems
+    df_advanced = pd.DataFrame(results_advanced["detailed_results"])
+    df_advanced.to_csv("advanced_retrieval_evaluation_results.csv", index=False)
     
-    # Save detailed results
-    df = pd.DataFrame(results["detailed_results"])
-    df.to_csv("enhanced_ragas_evaluation_results.csv", index=False)
-    print(f"\nDetailed results saved to enhanced_ragas_evaluation_results.csv")
+    df_baseline = pd.DataFrame(results_baseline["detailed_results"])
+    df_baseline.to_csv("baseline_retrieval_evaluation_results.csv", index=False)
     
-    return results
+    print(f"\nDetailed results saved to:")
+    print(f"- advanced_retrieval_evaluation_results.csv")
+    print(f"- baseline_retrieval_evaluation_results.csv")
+    
+    return {
+        "baseline": results_baseline,
+        "advanced": results_advanced,
+        "comparison": {
+            "standard_metrics": {metric: {
+                "baseline": results_baseline["aggregate_metrics"].get(metric, 0.0),
+                "advanced": results_advanced["aggregate_metrics"].get(metric, 0.0),
+                "improvement": results_advanced["aggregate_metrics"].get(metric, 0.0) - results_baseline["aggregate_metrics"].get(metric, 0.0)
+            } for metric in standard_metrics},
+            "agent_metrics": {metric: {
+                "baseline": results_baseline["aggregate_metrics"].get(metric, 0.0),
+                "advanced": results_advanced["aggregate_metrics"].get(metric, 0.0),
+                "improvement": results_advanced["aggregate_metrics"].get(metric, 0.0) - results_baseline["aggregate_metrics"].get(metric, 0.0)
+            } for metric in agent_metrics},
+            "overall_improvement": overall_improvement
+        }
+    }
 
 if __name__ == "__main__":
     main() 
