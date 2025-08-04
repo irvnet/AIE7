@@ -88,10 +88,48 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        <!-- Chat Interface -->
-        <div class="lg:col-span-3">
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 h-[600px] flex flex-col">
+      <!-- Tab Navigation -->
+      <div class="mb-6">
+        <div class="border-b border-gray-200">
+          <nav class="-mb-px flex space-x-8">
+            <button
+              @click="activeTab = 'chat'"
+              :class="[
+                'py-2 px-1 border-b-2 font-medium text-sm',
+                activeTab === 'chat'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              ]"
+            >
+              <div class="flex items-center space-x-2">
+                <MessageSquare class="w-4 h-4" />
+                <span>Chat Assistant</span>
+              </div>
+            </button>
+            <button
+              @click="activeTab = 'admin'"
+              :class="[
+                'py-2 px-1 border-b-2 font-medium text-sm',
+                activeTab === 'admin'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              ]"
+            >
+              <div class="flex items-center space-x-2">
+                <Shield class="w-4 h-4" />
+                <span>Admin Panel</span>
+              </div>
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Tab Content -->
+      <div v-if="activeTab === 'chat'">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <!-- Chat Interface -->
+          <div class="lg:col-span-3">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 h-[600px] flex flex-col">
             <!-- Chat Header -->
             <div class="p-4 border-b border-gray-200">
               <h2 class="text-lg font-semibold text-gray-900">Chat with AI Assistant</h2>
@@ -199,6 +237,8 @@
           </div>
         </div>
         
+        </div>
+        
         <!-- Sidebar -->
         <div class="lg:col-span-1">
           <div class="space-y-6">
@@ -256,6 +296,159 @@
           </div>
         </div>
       </div>
+
+      <!-- Admin Panel -->
+      <div v-if="activeTab === 'admin'" class="space-y-6">
+        <!-- System Status Overview -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">System Status</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-gray-50 rounded-lg p-4">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-600">System Status</span>
+                <div :class="[
+                  'w-3 h-3 rounded-full',
+                  systemStatus.initialized ? 'bg-green-500' : 'bg-red-500'
+                ]"></div>
+              </div>
+              <p class="text-2xl font-bold text-gray-900 mt-1">
+                {{ systemStatus.initialized ? 'Online' : 'Offline' }}
+              </p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-4">
+              <span class="text-sm font-medium text-gray-600">Documents Loaded</span>
+              <p class="text-2xl font-bold text-gray-900 mt-1">{{ systemStatus.documents_loaded }}</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-4">
+              <span class="text-sm font-medium text-gray-600">Total Chunks</span>
+              <p class="text-2xl font-bold text-gray-900 mt-1">{{ systemStatus.total_chunks }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Evaluation Results -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Performance Evaluation</h2>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium text-gray-600">Evaluation Status</span>
+              <button 
+                @click="runEvaluation"
+                :disabled="!systemStatus.initialized || evaluationRunning"
+                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              >
+                {{ evaluationRunning ? 'Running...' : 'Run Evaluation' }}
+              </button>
+            </div>
+            
+            <!-- Evaluation Metrics -->
+            <div v-if="evaluationResults" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="bg-blue-50 rounded-lg p-4">
+                <span class="text-sm font-medium text-blue-600">Faithfulness</span>
+                <p class="text-2xl font-bold text-blue-900 mt-1">{{ evaluationResults.aggregate_metrics?.faithfulness?.toFixed(2) || 'N/A' }}</p>
+              </div>
+              <div class="bg-green-50 rounded-lg p-4">
+                <span class="text-sm font-medium text-green-600">Relevance</span>
+                <p class="text-2xl font-bold text-green-900 mt-1">{{ evaluationResults.aggregate_metrics?.relevance?.toFixed(2) || 'N/A' }}</p>
+              </div>
+              <div class="bg-purple-50 rounded-lg p-4">
+                <span class="text-sm font-medium text-purple-600">Tool Accuracy</span>
+                <p class="text-2xl font-bold text-purple-900 mt-1">{{ evaluationResults.aggregate_metrics?.tool_call_accuracy?.toFixed(2) || 'N/A' }}</p>
+              </div>
+              <div class="bg-orange-50 rounded-lg p-4">
+                <span class="text-sm font-medium text-orange-600">Coordination</span>
+                <p class="text-2xl font-bold text-orange-900 mt-1">{{ evaluationResults.aggregate_metrics?.multi_agent_coordination?.toFixed(2) || 'N/A' }}</p>
+              </div>
+            </div>
+
+            <!-- Detailed Results Table -->
+            <div v-if="evaluationResults && evaluationResults.detailed_results" class="mt-6">
+              <h3 class="text-md font-semibold text-gray-900 mb-3">Detailed Test Results</h3>
+              <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Question</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Faithfulness</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Relevance</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tool Accuracy</th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200">
+                    <tr v-for="result in evaluationResults.detailed_results.slice(0, 5)" :key="result.question">
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ result.question.substring(0, 50) }}...</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ result.category }}</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ result.faithfulness?.toFixed(2) || 'N/A' }}</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ result.relevance?.toFixed(2) || 'N/A' }}</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ result.tool_call_accuracy?.toFixed(2) || 'N/A' }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Configuration -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">System Configuration</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 class="text-md font-medium text-gray-900 mb-2">Agent Status</h3>
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-gray-600">Research Team</span>
+                  <div :class="[
+                    'w-2 h-2 rounded-full',
+                    systemStatus.agents_ready ? 'bg-green-500' : 'bg-red-500'
+                  ]"></div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-gray-600">Response Team</span>
+                  <div :class="[
+                    'w-2 h-2 rounded-full',
+                    systemStatus.agents_ready ? 'bg-green-500' : 'bg-red-500'
+                  ]"></div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-gray-600">Meta-Supervisor</span>
+                  <div :class="[
+                    'w-2 h-2 rounded-full',
+                    systemStatus.agents_ready ? 'bg-green-500' : 'bg-red-500'
+                  ]"></div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3 class="text-md font-medium text-gray-900 mb-2">Data Sources</h3>
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-gray-600">FSA Handbook</span>
+                  <div :class="[
+                    'w-2 h-2 rounded-full',
+                    systemStatus.documents_loaded > 0 ? 'bg-green-500' : 'bg-red-500'
+                  ]"></div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-gray-600">Complaint Data</span>
+                  <div :class="[
+                    'w-2 h-2 rounded-full',
+                    systemStatus.documents_loaded > 0 ? 'bg-green-500' : 'bg-red-500'
+                  ]"></div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-gray-600">Vector Store</span>
+                  <div :class="[
+                    'w-2 h-2 rounded-full',
+                    systemStatus.vector_store_ready ? 'bg-green-500' : 'bg-red-500'
+                  ]"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
 </template>
@@ -263,7 +456,7 @@
 <script>
 import { ref, reactive, onMounted, nextTick } from 'vue'
 import { marked } from 'marked'
-import { GraduationCap, Settings, Send } from 'lucide-vue-next'
+import { GraduationCap, Settings, Send, MessageSquare, Shield } from 'lucide-vue-next'
 import axios from 'axios'
 
 // Configure marked for security
@@ -277,7 +470,9 @@ export default {
   components: {
     GraduationCap,
     Settings,
-    Send
+    Send,
+    MessageSquare,
+    Shield
   },
   setup() {
     const messages = ref([])
@@ -292,6 +487,11 @@ export default {
     const initializationProgress = ref(0)
     const initializationMessage = ref('')
     const showInitializationProgress = ref(false)
+    
+    // Admin panel state
+    const activeTab = ref('chat')
+    const evaluationRunning = ref(false)
+    const evaluationResults = ref(null)
     
     const systemStatus = reactive({
       initialized: false,
@@ -492,6 +692,33 @@ export default {
       }
     }
     
+    // Run evaluation from admin panel
+    const runEvaluation = async () => {
+      if (!systemStatus.initialized) {
+        alert('System must be initialized before running evaluation')
+        return
+      }
+      
+      evaluationRunning.value = true
+      try {
+        // Call the evaluation endpoint
+        const response = await axios.post(`${API_BASE_URL}/evaluate`, {
+          openai_api_key: config.openaiApiKey
+        })
+        
+        if (response.data.success) {
+          evaluationResults.value = response.data.results
+        } else {
+          alert('Evaluation failed: ' + response.data.error)
+        }
+      } catch (error) {
+        console.error('Evaluation error:', error)
+        alert('Failed to run evaluation. Please check the console for details.')
+      } finally {
+        evaluationRunning.value = false
+      }
+    }
+    
     onMounted(() => {
       fetchSystemStatus()
     })
@@ -511,7 +738,11 @@ export default {
       renderMarkdown,
       initializationProgress,
       initializationMessage,
-      showInitializationProgress
+      showInitializationProgress,
+      activeTab,
+      evaluationRunning,
+      evaluationResults,
+      runEvaluation
     }
   }
 }

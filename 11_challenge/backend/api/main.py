@@ -38,6 +38,9 @@ class InitializeRequest(BaseModel):
     openai_api_key: str
     tavily_api_key: Optional[str] = None
 
+class EvaluateRequest(BaseModel):
+    openai_api_key: str
+
 # FastAPI app
 app = FastAPI(
     title="Student Loan Assistant API",
@@ -100,6 +103,33 @@ async def get_system_status():
         documents_loaded=len(manager.document_loader.documents) if manager.document_loader else 0,
         total_chunks=len(manager.document_loader.chunks) if manager.document_loader else 0
     )
+
+@app.post("/evaluate")
+async def run_evaluation(request: EvaluateRequest):
+    """Run the RAGAS evaluation from the admin panel"""
+    try:
+        # Set the API key for the evaluation
+        os.environ["OPENAI_API_KEY"] = request.openai_api_key
+        
+        # Import and run evaluation
+        import sys
+        from pathlib import Path
+        sys.path.append(str(Path(__file__).parent.parent.parent))
+        
+        from evaluation import EnhancedRAGASEvaluator
+        
+        evaluator = EnhancedRAGASEvaluator(request.openai_api_key)
+        results = evaluator.run_evaluation()
+        
+        return {
+            "success": True,
+            "results": results
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
 
 @app.post("/initialize")
 async def initialize_system(request: InitializeRequest):
