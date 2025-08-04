@@ -243,10 +243,19 @@ async def initialize_system(request: InitializeRequest):
                 "progress": 90
             }))
             
+            # Create advanced retriever
+            from core.advanced_retrieval import create_advanced_retriever
+            advanced_retriever = create_advanced_retriever(
+                vector_store=manager.vector_store,
+                embedding_model=embedding_model,
+                documents=manager.document_loader.chunks
+            )
+            
             manager.multi_agent_system = MultiAgentSystem(
-                rag_retriever=manager.retriever,
+                rag_retriever=advanced_retriever,
                 complaint_retriever=manager.complaint_retriever,
-                tavily_api_key=request.tavily_api_key
+                tavily_api_key=request.tavily_api_key,
+                use_advanced_retrieval=True
             )
             print("Multi-agent system initialized successfully")
             

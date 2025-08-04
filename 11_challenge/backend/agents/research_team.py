@@ -22,7 +22,7 @@ class ResearchTeamState(TypedDict):
     next: str
 
 
-def create_research_team(llm: ChatOpenAI, rag_retriever, tavily_api_key: str = None):
+def create_research_team(llm: ChatOpenAI, rag_retriever, tavily_api_key: str = None, use_advanced_retrieval: bool = True):
     """Create the research team with Search and RAG agents.
     
     Based on proven pattern from example code lesson 6.
@@ -36,11 +36,16 @@ def create_research_team(llm: ChatOpenAI, rag_retriever, tavily_api_key: str = N
         tavily_tool = create_tavily_search_tool()
         tools.append(tavily_tool)
     
-    # Create RAG tool
+    # Create RAG tool with advanced retrieval
     @tool
     def rag_search(query: str) -> str:
-        """Search for information in the student loan knowledge base."""
-        docs = rag_retriever.invoke(query)
+        """Search for information in the student loan knowledge base using advanced retrieval techniques."""
+        if use_advanced_retrieval and hasattr(rag_retriever, 'search'):
+            # Use advanced retriever if available
+            docs = rag_retriever.search(query, k=5, use_advanced=True)
+        else:
+            # Fallback to standard retriever
+            docs = rag_retriever.invoke(query)
         return "\n\n".join([doc.page_content for doc in docs])
     
     tools.append(rag_search)

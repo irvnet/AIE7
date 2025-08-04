@@ -16,17 +16,19 @@ from .tools import create_random_subdirectory
 class MultiAgentSystem:
     """Main multi-agent system for student loan assistance."""
     
-    def __init__(self, rag_retriever, complaint_retriever, tavily_api_key: str = None):
+    def __init__(self, rag_retriever, complaint_retriever, tavily_api_key: str = None, use_advanced_retrieval: bool = True):
         """Initialize the multi-agent system.
         
         Args:
             rag_retriever: Retriever for student loan documents
             complaint_retriever: Retriever for complaint data
             tavily_api_key: Optional Tavily API key for real-time search
+            use_advanced_retrieval: Whether to use advanced retrieval techniques
         """
         self.rag_retriever = rag_retriever
         self.complaint_retriever = complaint_retriever
         self.tavily_api_key = tavily_api_key
+        self.use_advanced_retrieval = use_advanced_retrieval
         
         # Initialize LLM
         self.llm = ChatOpenAI(model="gpt-4o-mini")
@@ -35,7 +37,8 @@ class MultiAgentSystem:
         self.research_chain = create_research_team(
             self.llm, 
             self.rag_retriever, 
-            self.tavily_api_key
+            self.tavily_api_key,
+            use_advanced_retrieval
         )
         self.response_chain = create_response_team(
             self.llm, 
