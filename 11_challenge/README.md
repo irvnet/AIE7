@@ -1,88 +1,253 @@
+# Student Loan Assistant - Multi-Agent RAG System
 
-<p align = "center" draggable=”false” ><img src="https://github.com/AI-Maker-Space/LLM-Dev-101/assets/37101144/d1343317-fa2f-41e1-8af1-1dbb18399719" 
-     width="200px"
-     height="auto"/>
-</p>
+A sophisticated multi-agent RAG (Retrieval Augmented Generation) system for student loan guidance, built with Vue.js frontend and FastAPI backend.
 
-## <h1 align="center" id="heading">Session 6: Multi-Agent with LangGraph</h1>
+## 🎯 Project Overview
 
-| 🤓 Pre-work | 📰 Session Sheet | ⏺️ Recording     | 🖼️ Slides        | 👨‍💻 Repo         | 📝 Homework      | 📁 Feedback       |
-|:-----------------|:-----------------|:-----------------|:-----------------|:-----------------|:-----------------|:-----------------|
-| [Session 6: Pre-Work](https://www.notion.so/Session-6-Multi-Agent-Applications-with-LangGraph-22bcd547af3d80f7a2e0cc7a2c6d7d8f?source=copy_link#22bcd547af3d8021ac68fade5a7b9df2)| [Session 6: Multi-Agent Applications with LangGraph](https://www.notion.so/Session-6-Multi-Agent-Applications-with-LangGraph-22bcd547af3d80f7a2e0cc7a2c6d7d8f) | [Recording!](https://us02web.zoom.us/rec/share/CnsbWyce6zleEHYzebhqGcbg0syunLmLkWroRQ7ATRKaz3rDqGa7sj7FQfb0hb8U.aB_oEqnl75nk68ej)  (@2nEaXuk) | [Session 6 Slides](https://www.canva.com/design/DAGstHQ78gU/D_DHLWAO5KZoQ5R1RjG3YA/edit?utm_content=DAGstHQ78gU&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton) | You are here! | [Session 6 Assignment: Multi-agents](https://forms.gle/HScbKATi6nCNYZx57)| [AIE7 Feedback 7/10](https://forms.gle/itQqhBW2PY7DTFi76)
+This system transforms complex student loan information into personalized, empathetic guidance using:
+- **Multi-Agent Architecture** - Specialized agents for research, writing, and editing
+- **RAG System** - Retrieval from government documents and real-time search
+- **Modern UI** - Beautiful Vue.js interface with real-time chat
+- **Production-Grade Stack** - FastAPI, WebSockets, and scalable components
 
-In today's assignment, we'll be creating a MULTI-Agentic LangGraph Application.
-
-- 🤝 Breakout Room #1:
-  1. Simple LCEL RAG
-  2. Helper Functions for Agent Graphs
-  3. Research Team - A LangGraph for Researching A Specific Topic
-  
-- 🤝 Breakout Room #2:
-  1. Document Writing Team - A LangGraph for Writing, Editing, and Planning a LinkedIn post.
-  2. Meta-Supervisor and Full Graph
-
-### 🚧 OPTIONAL: Advanced Build
-
-> NOTE: This is an optional task - and is not required to achieve full marks on the assignment.
-
-Build a graph to produce a social media post about a given Machine Learning paper. 
-
-The graph should employ an additional team that verifies the correctness of the produced paper, and verify it fits the theme and style of your selected social media platform.
-
-## Ship 🚢
-
-The completed notebook!
-
-### Deliverables
-
-- A short Loom of the notebook, and a 1min. walkthrough of the application in full
-
-## Share 🚀
-
-Make a social media post about your final application!
-
-### Deliverables
-
-- Make a post on any social media platform about what you built!
-
-Here's a template to get you started:
+## 🏗️ Architecture
 
 ```
-🚀 Exciting News! 🚀
-
-I am thrilled to announce that I have just built and shipped an Multi-Agent Application with LangGraph! 🎉🤖
-
-🔍 Three Key Takeaways:
-1️⃣ 
-2️⃣ 
-3️⃣ 
-
-Let's continue pushing the boundaries of what's possible in the world of AI and question-answering. Here's to many more innovations! 🚀
-Shout out to @AIMakerspace !
-
-#LangChain #QuestionAnswering #RetrievalAugmented #Innovation #AI #TechMilestone
-
-Feel free to reach out if you're curious or would like to collaborate on similar projects! 🤝🔥
+┌─────────────────────────────────────────────────────────────┐
+│                    Vue.js Frontend                          │
+│  🎨 Modern UI • 💬 Real-time Chat • 📝 Markdown Support     │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                    HTTP/REST + WebSocket
+                              │
+┌─────────────────────────────────────────────────────────────┐
+│                   FastAPI Backend                          │
+│  🔌 REST API • 🔄 WebSocket • 🔧 System Management         │
+└─────────────────────────────────────────────────────────────┘
+                              │
+┌─────────────────────────────────────────────────────────────┐
+│                Multi-Agent RAG System                      │
+│  🔍 Research Team • ✍️ Writing Team • 🎯 Meta-Supervisor   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+┌─────────────────────────────────────────────────────────────┐
+│                    Data Layer                              │
+│  📄 FSA Handbook • 📊 Complaint Data • 🔍 Vector Store     │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## Submitting Your Homework
+## 🚀 Quick Start
 
-### Main Homework Assignment
+### Prerequisites
 
-Follow these steps to prepare and submit your homework assignment:
-1. Create a branch of your `AIE7` repo to track your changes. Example command: `git checkout -b s06-assignment`
-2. Respond to the activities and questions in the `Multi_Agent_RAG_LangGraph.ipynb` notebook:
-    + Edit the markdown cells of the activities and questions then enter your responses
-    + Edit/Create code cell(s) where necessary as part of an activity
-    + NOTE: Remember to create a header (example: `##### ✅ Answer:`) to help the grader find your responses
-3. Commit, and push your completed notebook to your `origin` repository. _NOTE: Do not merge it into your main branch._
-4. Make sure to include all of the following on your Homework Submission Form:
-    + The GitHub URL to the completed notebook _on your assignment branch (not main)_
-    + The URL to your Loom Video
-    + Your Three lessons learned/not yet learned
-    + The URLs to any social media posts (LinkedIn, X, Discord, etc.) ⬅️ _easy Extra Credit points!_
+- Python 3.11+
+- Node.js 18+
+- OpenAI API Key
+- Tavily API Key (optional)
 
-### Advanced Build
-In addition to the above, include on your homework submission form the URLs to your Advanced Build's:
-+ GitHub Repo
-+ Production Deployment
+### Backend Setup
+
+1. **Install Python dependencies:**
+   ```bash
+   uv sync
+   ```
+
+2. **Start the FastAPI backend:**
+   ```bash
+   uvicorn backend.api.main:app --reload --host 0.0.0.0 --port 8000
+   ```
+   
+   **Or use the startup script:**
+   ```bash
+   ./start.sh
+   ```
+
+3. **Access API documentation:**
+   - Swagger UI: http://localhost:8000/docs
+   - ReDoc: http://localhost:8000/redoc
+
+### Frontend Setup
+
+1. **Navigate to frontend directory:**
+   ```bash
+   cd frontend
+   ```
+
+2. **Install Node.js dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Start the Vue.js development server:**
+   ```bash
+   npm run dev
+   ```
+
+4. **Access the application:**
+   - Frontend: http://localhost:3000
+   - Backend: http://localhost:8000
+
+## 📁 Project Structure
+
+```
+11_challenge/
+├── backend/                      # Backend source code
+│   ├── api/                      # FastAPI application
+│   │   └── main.py              # Main API server
+│   ├── core/                     # Core RAG components
+│   │   └── vector_store.py      # Vector store management
+│   ├── data/                     # Data processing
+│   │   └── document_loader.py   # Document loading & chunking
+│   ├── evaluation/               # RAGAS evaluation
+│   │   └── evaluation.py        # Performance evaluation
+│   └── utils/                    # Utility functions
+├── frontend/                     # Vue.js frontend
+│   ├── src/
+│   │   ├── App.vue              # Main application component
+│   │   ├── main.js              # Application entry point
+│   │   └── style.css            # Global styles
+│   ├── package.json             # Frontend dependencies
+│   ├── vite.config.js           # Vite configuration
+│   └── tailwind.config.js       # Tailwind CSS configuration
+├── data/                         # Document storage
+│   ├── _knowledge-center_fsa-handbook_2025-2026_vol8.pdf
+│   ├── complaints.csv
+│   └── ...                      # Other government documents
+├── ai-challenge-prototype.ipynb  # Original prototype
+├── pyproject.toml               # Python dependencies
+└── README.md                    # This file
+```
+
+## 🔧 Configuration
+
+### Backend Configuration
+
+The backend uses environment variables for configuration:
+
+```bash
+export OPENAI_API_KEY="your-openai-api-key"
+export TAVILY_API_KEY="your-tavily-api-key"  # Optional
+```
+
+### Frontend Configuration
+
+No environment variables needed - all configuration is done through the UI:
+1. Click the settings icon (⚙️) in the header
+2. Enter your API keys
+3. Click "Initialize System"
+
+## 🎯 Key Features
+
+### Multi-Agent System
+- **Research Team**: Search agent, RAG agent, information synthesis
+- **Writing Team**: Note taker, document writer, empathy editor, copy editor
+- **Meta-Supervisor**: Orchestrates team collaboration
+
+### Advanced Retrieval System
+- **BM25 Retrieval**: Traditional keyword-based retrieval for exact term matching
+- **Multi-Query Retrieval**: LLM-generated query variations for improved recall
+- **Parent Document Retrieval**: Small-to-big strategy for better context preservation
+- **Contextual Compression**: Reranking using Cohere's rerank-v3.5 model
+- **Ensemble Retrieval**: Reciprocal Rank Fusion combining all techniques
+- **Graceful Degradation**: System works even if some techniques fail
+
+### Real-time Chat Interface
+- WebSocket-based communication
+- Typing indicators
+- Message history
+- Markdown rendering for rich responses
+- Progress indicators during system initialization
+- Sidebar with system status and example questions
+
+### Admin Panel
+- **System Monitoring**: Real-time status display, document and chunk counts
+- **Performance Evaluation**: RAGAS framework integration with 10 test scenarios
+- **Agent Status**: Individual agent availability indicators
+- **Data Sources**: FSA Handbook, complaint data, and vector store status
+
+### User Interface
+- **Separate Pages**: Clean navigation between chat and admin interfaces
+- **Responsive Design**: Works on desktop and mobile devices
+- **Professional UI**: Modern Vue.js interface with Tailwind CSS
+
+### Data Sources
+- **FSA Handbook 2025-2026** - Comprehensive loan program information
+- **Complaint Data** - Historical user feedback and issues
+- **Real-time Search** - Current policy updates via Tavily
+
+## 🧪 Testing
+
+### Backend Testing
+
+```bash
+# Test document loader
+python backend/data/document_loader.py
+
+# Test vector store
+python backend/core/vector_store.py
+
+# Test evaluation framework
+python backend/evaluation/evaluation.py
+```
+
+### Frontend Testing
+
+```bash
+cd frontend
+npm run lint
+npm run build
+```
+
+## 📊 Evaluation
+
+The system uses enhanced RAGAS framework for comprehensive evaluation:
+
+### Standard RAGAS Metrics
+- **Faithfulness** - Response accuracy to retrieved context
+- **Response Relevance** - Relevance to user query
+- **Context Precision** - Quality of retrieved information
+- **Context Recall** - Completeness of retrieved information
+
+### Multi-Agent Specific Metrics
+- **Tool Call Accuracy** - Appropriate tool selection by agents
+- **Agent Goal Accuracy** - Success rate of agent objectives
+- **Multi-Agent Coordination** - Effectiveness of team collaboration
+
+### Test Coverage
+- **10 Comprehensive Test Scenarios** covering loan amounts, types, repayment, eligibility, interest rates, forgiveness, application, costs, and consolidation
+- **Admin Panel Integration** - Run evaluations directly from the UI
+- **Detailed Results** - Individual test case analysis with performance breakdown
+
+## 🚀 Deployment
+
+### Backend Deployment
+
+```bash
+# Production build
+uvicorn backend.api.main:app --host 0.0.0.0 --port 8000 --workers 4
+```
+
+### Frontend Deployment
+
+```bash
+cd frontend
+npm run build
+# Serve dist/ directory with your web server
+```
+
+## 🤝 Contributing
+
+1. Follow the existing code structure
+2. Add tests for new features
+3. Update documentation
+4. Use conventional commit messages
+
+## 📝 License
+
+This project is part of the AIE7 Session 11 Certification Challenge.
+
+## 🔗 Links
+
+- **API Documentation**: http://localhost:8000/docs
+- **Frontend**: http://localhost:3000
+- **Backend Health**: http://localhost:8000
