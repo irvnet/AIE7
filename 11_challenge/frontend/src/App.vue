@@ -14,8 +14,41 @@
             </div>
           </div>
           
-          <!-- System Status -->
+          <!-- Navigation and System Status -->
           <div class="flex items-center space-x-4">
+            <!-- Navigation -->
+            <div class="flex items-center space-x-2">
+              <button
+                @click="currentPage = 'chat'"
+                :class="[
+                  'px-3 py-2 text-sm rounded-lg transition-colors',
+                  currentPage === 'chat'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ]"
+              >
+                <div class="flex items-center space-x-2">
+                  <MessageSquare class="w-4 h-4" />
+                  <span>Chat</span>
+                </div>
+              </button>
+              <button
+                @click="currentPage = 'admin'"
+                :class="[
+                  'px-3 py-2 text-sm rounded-lg transition-colors',
+                  currentPage === 'admin'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ]"
+              >
+                <div class="flex items-center space-x-2">
+                  <Shield class="w-4 h-4" />
+                  <span>Admin</span>
+                </div>
+              </button>
+            </div>
+            
+            <!-- System Status -->
             <div class="flex items-center space-x-2">
               <div :class="[
                 'w-3 h-3 rounded-full',
@@ -88,48 +121,11 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Tab Navigation -->
-      <div class="mb-6">
-        <div class="border-b border-gray-200">
-          <nav class="-mb-px flex space-x-8">
-            <button
-              @click="activeTab = 'chat'"
-              :class="[
-                'py-2 px-1 border-b-2 font-medium text-sm',
-                activeTab === 'chat'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              ]"
-            >
-              <div class="flex items-center space-x-2">
-                <MessageSquare class="w-4 h-4" />
-                <span>Chat Assistant</span>
-              </div>
-            </button>
-            <button
-              @click="activeTab = 'admin'"
-              :class="[
-                'py-2 px-1 border-b-2 font-medium text-sm',
-                activeTab === 'admin'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              ]"
-            >
-              <div class="flex items-center space-x-2">
-                <Shield class="w-4 h-4" />
-                <span>Admin Panel</span>
-              </div>
-            </button>
-          </nav>
-        </div>
-      </div>
-
-      <!-- Tab Content -->
-      <div v-if="activeTab === 'chat'">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <!-- Chat Interface -->
-          <div class="lg:col-span-3">
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 h-[600px] flex flex-col">
+      <!-- Chat Interface -->
+      <div v-if="currentPage === 'chat'" class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- Chat Interface -->
+        <div class="lg:col-span-3">
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 h-[600px] flex flex-col">
             <!-- Chat Header -->
             <div class="p-4 border-b border-gray-200">
               <h2 class="text-lg font-semibold text-gray-900">Chat with AI Assistant</h2>
@@ -237,8 +233,6 @@
           </div>
         </div>
         
-        </div>
-        
         <!-- Sidebar -->
         <div class="lg:col-span-1">
           <div class="space-y-6">
@@ -298,7 +292,7 @@
       </div>
 
       <!-- Admin Panel -->
-      <div v-if="activeTab === 'admin'" class="space-y-6">
+      <div v-if="currentPage === 'admin'" class="space-y-6">
         <!-- System Status Overview -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h2 class="text-lg font-semibold text-gray-900 mb-4">System Status</h2>
@@ -328,36 +322,38 @@
 
         <!-- Evaluation Results -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">Performance Evaluation</h2>
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <span class="text-sm font-medium text-gray-600">Evaluation Status</span>
-              <button 
-                @click="runEvaluation"
-                :disabled="!systemStatus.initialized || evaluationRunning"
-                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-              >
-                {{ evaluationRunning ? 'Running...' : 'Run Evaluation' }}
-              </button>
-            </div>
-            
-            <!-- Evaluation Metrics -->
-            <div v-if="evaluationResults" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div class="bg-blue-50 rounded-lg p-4">
-                <span class="text-sm font-medium text-blue-600">Faithfulness</span>
-                <p class="text-2xl font-bold text-blue-900 mt-1">{{ evaluationResults.aggregate_metrics?.faithfulness?.toFixed(2) || 'N/A' }}</p>
-              </div>
-              <div class="bg-green-50 rounded-lg p-4">
-                <span class="text-sm font-medium text-green-600">Relevance</span>
-                <p class="text-2xl font-bold text-green-900 mt-1">{{ evaluationResults.aggregate_metrics?.relevance?.toFixed(2) || 'N/A' }}</p>
-              </div>
-              <div class="bg-purple-50 rounded-lg p-4">
-                <span class="text-sm font-medium text-purple-600">Tool Accuracy</span>
-                <p class="text-2xl font-bold text-purple-900 mt-1">{{ evaluationResults.aggregate_metrics?.tool_call_accuracy?.toFixed(2) || 'N/A' }}</p>
-              </div>
-              <div class="bg-orange-50 rounded-lg p-4">
-                <span class="text-sm font-medium text-orange-600">Coordination</span>
-                <p class="text-2xl font-bold text-orange-900 mt-1">{{ evaluationResults.aggregate_metrics?.multi_agent_coordination?.toFixed(2) || 'N/A' }}</p>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-900">Performance Evaluation</h2>
+            <button 
+              @click="runEvaluation"
+              :disabled="evaluationRunning || !systemStatus.initialized"
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {{ evaluationRunning ? 'Running...' : 'Run Evaluation' }}
+            </button>
+          </div>
+          
+          <div v-if="evaluationResults" class="space-y-6">
+            <!-- Evaluation Status -->
+            <div>
+              <h3 class="text-md font-semibold text-gray-900 mb-3">Evaluation Status</h3>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-blue-50 rounded-lg p-4">
+                  <span class="text-sm font-medium text-blue-600">Faithfulness</span>
+                  <p class="text-2xl font-bold text-blue-900 mt-1">{{ evaluationResults.aggregate_metrics?.faithfulness?.toFixed(2) || 'N/A' }}</p>
+                </div>
+                <div class="bg-green-50 rounded-lg p-4">
+                  <span class="text-sm font-medium text-green-600">Relevance</span>
+                  <p class="text-2xl font-bold text-green-900 mt-1">{{ evaluationResults.aggregate_metrics?.relevance?.toFixed(2) || 'N/A' }}</p>
+                </div>
+                <div class="bg-purple-50 rounded-lg p-4">
+                  <span class="text-sm font-medium text-purple-600">Tool Accuracy</span>
+                  <p class="text-2xl font-bold text-purple-900 mt-1">{{ evaluationResults.aggregate_metrics?.tool_call_accuracy?.toFixed(2) || 'N/A' }}</p>
+                </div>
+                <div class="bg-orange-50 rounded-lg p-4">
+                  <span class="text-sm font-medium text-orange-600">Coordination</span>
+                  <p class="text-2xl font-bold text-orange-900 mt-1">{{ evaluationResults.aggregate_metrics?.multi_agent_coordination?.toFixed(2) || 'N/A' }}</p>
+                </div>
               </div>
             </div>
 
@@ -489,7 +485,7 @@ export default {
     const showInitializationProgress = ref(false)
     
     // Admin panel state
-    const activeTab = ref('chat')
+    const currentPage = ref('chat')
     const evaluationRunning = ref(false)
     const evaluationResults = ref(null)
     
@@ -739,7 +735,7 @@ export default {
       initializationProgress,
       initializationMessage,
       showInitializationProgress,
-      activeTab,
+      currentPage,
       evaluationRunning,
       evaluationResults,
       runEvaluation
