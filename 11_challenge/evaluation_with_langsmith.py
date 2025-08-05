@@ -26,23 +26,39 @@ def setup_langsmith():
         print("⚠️  LangSmith not available - continuing without tracing")
         return False
 
-def run_quick_evaluation():
+def run_quick_evaluation(openai_key=None, langsmith_key=None):
     """Run a quick evaluation to test the comparison"""
     print("🚀 Quick Performance Comparison")
     print("=" * 50)
     
-    # Get API key
-    openai_key = os.getenv("OPENAI_API_KEY")
-    if not openai_key:
-        try:
-            openai_key = input("Please enter your OpenAI API key: ").strip()
-            if not openai_key:
-                print("OpenAI API key is required")
-                return
-            os.environ["OPENAI_API_KEY"] = openai_key
-        except KeyboardInterrupt:
-            print("\nEvaluation cancelled")
-            return
+    # Collect and validate API keys
+    try:
+        from api_key_manager import get_api_keys, APIKeys
+        
+        if openai_key and langsmith_key:
+            # Use provided keys
+            keys = APIKeys(
+                openai_api_key=openai_key,
+                langsmith_api_key=langsmith_key
+            )
+        else:
+            # Collect keys interactively
+            keys = get_api_keys(interactive=True)
+        
+        # Validate keys
+        from api_key_manager import validate_api_keys
+        errors = validate_api_keys(keys)
+        if errors:
+            print("❌ API key validation errors:")
+            for error in errors:
+                print(f"  - {error}")
+            return None
+        
+        print("✅ All API keys validated successfully")
+        
+    except Exception as e:
+        print(f"❌ Error collecting API keys: {e}")
+        return None
     
     # Setup LangSmith
     setup_langsmith()
@@ -53,13 +69,13 @@ def run_quick_evaluation():
         # Test with just 2 questions for quick comparison
         print("\n🔧 Testing Advanced Retrieval...")
         evaluator_advanced = EnhancedRAGASEvaluator(
-            openai_api_key=openai_key,
+            openai_api_key=keys.openai_api_key,
             use_advanced_retrieval=True
         )
         
         # Setup multi-agent system
         print("Setting up advanced retrieval multi-agent system...")
-        evaluator_advanced.setup_multi_agent_system(openai_key)
+        evaluator_advanced.setup_multi_agent_system(keys.openai_api_key)
         
         # Test single question
         test_question = "What is the maximum loan amount for dependent undergraduate students?"
@@ -74,13 +90,13 @@ def run_quick_evaluation():
         
         print("\n🔧 Testing Baseline Retrieval...")
         evaluator_baseline = EnhancedRAGASEvaluator(
-            openai_api_key=openai_key,
+            openai_api_key=keys.openai_api_key,
             use_advanced_retrieval=False
         )
         
         # Setup multi-agent system
         print("Setting up baseline retrieval multi-agent system...")
-        evaluator_baseline.setup_multi_agent_system(openai_key)
+        evaluator_baseline.setup_multi_agent_system(keys.openai_api_key)
         
         start_time = time.time()
         response_baseline = evaluator_baseline.multi_agent_system.process_query(test_question)
@@ -121,23 +137,39 @@ def run_quick_evaluation():
         traceback.print_exc()
         return None
 
-def run_full_evaluation_with_progress():
+def run_full_evaluation_with_progress(openai_key=None, langsmith_key=None):
     """Run full evaluation with progress tracking"""
     print("🚀 Full Performance Evaluation with Progress Tracking")
     print("=" * 60)
     
-    # Get API key
-    openai_key = os.getenv("OPENAI_API_KEY")
-    if not openai_key:
-        try:
-            openai_key = input("Please enter your OpenAI API key: ").strip()
-            if not openai_key:
-                print("OpenAI API key is required")
-                return
-            os.environ["OPENAI_API_KEY"] = openai_key
-        except KeyboardInterrupt:
-            print("\nEvaluation cancelled")
-            return
+    # Collect and validate API keys
+    try:
+        from api_key_manager import get_api_keys, APIKeys
+        
+        if openai_key and langsmith_key:
+            # Use provided keys
+            keys = APIKeys(
+                openai_api_key=openai_key,
+                langsmith_api_key=langsmith_key
+            )
+        else:
+            # Collect keys interactively
+            keys = get_api_keys(interactive=True)
+        
+        # Validate keys
+        from api_key_manager import validate_api_keys
+        errors = validate_api_keys(keys)
+        if errors:
+            print("❌ API key validation errors:")
+            for error in errors:
+                print(f"  - {error}")
+            return None
+        
+        print("✅ All API keys validated successfully")
+        
+    except Exception as e:
+        print(f"❌ Error collecting API keys: {e}")
+        return None
     
     # Setup LangSmith
     setup_langsmith()
@@ -147,7 +179,7 @@ def run_full_evaluation_with_progress():
         
         print("\n📊 Running Advanced Retrieval Evaluation...")
         evaluator_advanced = EnhancedRAGASEvaluator(
-            openai_api_key=openai_key,
+            openai_api_key=keys.openai_api_key,
             use_advanced_retrieval=True
         )
         
@@ -156,7 +188,7 @@ def run_full_evaluation_with_progress():
         
         print("\n📊 Running Baseline Retrieval Evaluation...")
         evaluator_baseline = EnhancedRAGASEvaluator(
-            openai_api_key=openai_key,
+            openai_api_key=keys.openai_api_key,
             use_advanced_retrieval=False
         )
         

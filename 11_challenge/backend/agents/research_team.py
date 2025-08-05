@@ -40,13 +40,21 @@ def create_research_team(llm: ChatOpenAI, rag_retriever, tavily_api_key: str = N
     @tool
     def rag_search(query: str) -> str:
         """Search for information in the student loan knowledge base using advanced retrieval techniques."""
-        if use_advanced_retrieval and hasattr(rag_retriever, 'search'):
-            # Use advanced retriever if available
-            docs = rag_retriever.search(query, k=5, use_advanced=True)
-        else:
-            # Fallback to standard retriever
-            docs = rag_retriever.invoke(query)
-        return "\n\n".join([doc.page_content for doc in docs])
+        try:
+            if use_advanced_retrieval and hasattr(rag_retriever, 'search'):
+                # Use advanced retriever if available
+                docs = rag_retriever.search(query, k=5, use_advanced=True)
+            else:
+                # Fallback to standard retriever
+                docs = rag_retriever.invoke(query)
+            
+            if not docs:
+                return "No relevant information found in the knowledge base."
+            
+            return "\n\n".join([doc.page_content for doc in docs])
+        except Exception as e:
+            print(f"Error in rag_search tool: {e}")
+            return f"Error searching knowledge base: {str(e)}"
     
     tools.append(rag_search)
     

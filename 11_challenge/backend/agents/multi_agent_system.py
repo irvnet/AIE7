@@ -16,7 +16,7 @@ from .tools import create_random_subdirectory
 class MultiAgentSystem:
     """Main multi-agent system for student loan assistance."""
     
-    def __init__(self, rag_retriever, complaint_retriever, tavily_api_key: str = None, use_advanced_retrieval: bool = True):
+    def __init__(self, rag_retriever, complaint_retriever, tavily_api_key: str = None, use_advanced_retrieval: bool = True, openai_api_key: str = None):
         """Initialize the multi-agent system.
         
         Args:
@@ -24,14 +24,21 @@ class MultiAgentSystem:
             complaint_retriever: Retriever for complaint data
             tavily_api_key: Optional Tavily API key for real-time search
             use_advanced_retrieval: Whether to use advanced retrieval techniques
+            openai_api_key: OpenAI API key for LLM access
         """
         self.rag_retriever = rag_retriever
         self.complaint_retriever = complaint_retriever
         self.tavily_api_key = tavily_api_key
         self.use_advanced_retrieval = use_advanced_retrieval
         
+        # Get API key from parameter or environment
+        import os
+        api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OpenAI API key must be provided either as parameter or OPENAI_API_KEY environment variable")
+        
         # Initialize LLM
-        self.llm = ChatOpenAI(model="gpt-4o-mini")
+        self.llm = ChatOpenAI(model="gpt-4o-mini", api_key=api_key)
         
         # Create agent teams
         self.research_chain = create_research_team(
@@ -73,22 +80,31 @@ class MultiAgentSystem:
             
             # Process through meta-supervisor
             final_response = None
+            step_count = 0
+            
             for step in self.meta_supervisor.stream(
                 initial_state, 
                 {"recursion_limit": max_iterations}
             ):
+                step_count += 1
+                if step_count > max_iterations:
+                    print(f"Warning: Reached maximum iterations ({max_iterations})")
+                    break
+                    
                 if "__end__" not in step:
                     # Extract the last message from each step
                     for key, value in step.items():
-                        if key != "__end__" and "messages" in value:
+                        if key != "__end__" and isinstance(value, dict) and "messages" in value:
                             messages = value["messages"]
-                            if messages:
+                            if messages and len(messages) > 0:
                                 final_response = messages[-1].content
             
             return final_response if final_response else "I'm sorry, I couldn't process your request."
             
         except Exception as e:
             print(f"Error in multi-agent system: {e}")
+            import traceback
+            traceback.print_exc()
             return f"I encountered an error while processing your request: {str(e)}"
     
     def get_system_status(self) -> dict:

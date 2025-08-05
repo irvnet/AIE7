@@ -98,6 +98,20 @@
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="tvly-..."
             />
+            <p class="text-xs text-gray-500 mt-1">For real-time search functionality</p>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              LangSmith API Key (Optional)
+            </label>
+            <input 
+              v-model="config.langsmithApiKey"
+              type="password"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="lsv2_..."
+            />
+            <p class="text-xs text-gray-500 mt-1">For detailed tracing and analytics</p>
           </div>
         </div>
         
@@ -328,24 +342,21 @@
           
           <!-- Evaluation Configuration -->
           <div class="mb-6 space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Evaluation Type:</label>
-                <select v-model="evaluationType" class="w-full p-2 border border-gray-300 rounded">
-                  <option value="quick">Quick Test (1 question, ~30s)</option>
-                  <option value="full">Full Evaluation (10 questions, ~5min)</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">LangSmith API Key (Optional):</label>
-                <input 
-                  v-model="langsmithApiKey" 
-                  type="password" 
-                  placeholder="Enter LangSmith API key for tracing"
-                  class="w-full p-2 border border-gray-300 rounded"
-                />
-                <p class="text-xs text-gray-500 mt-1">Provides detailed tracing and analytics</p>
-              </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Evaluation Type:</label>
+              <select v-model="evaluationType" class="w-full p-2 border border-gray-300 rounded">
+                <option value="quick">Quick Test (1 question, ~30s)</option>
+                <option value="full">Full Evaluation (10 questions, ~5min)</option>
+              </select>
+            </div>
+            <div v-if="!config.langsmithApiKey" class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+              <p class="text-sm text-yellow-800">
+                💡 <strong>Tip:</strong> Add your LangSmith API key in the 
+                <button @click="showConfig = true" class="text-yellow-600 hover:text-yellow-800 underline font-medium">
+                  system configuration
+                </button> 
+                for detailed tracing and analytics.
+              </p>
             </div>
             <button 
               @click="runEvaluation"
@@ -535,7 +546,6 @@ export default {
     const evaluationRunning = ref(false)
     const evaluationResults = ref(null)
     const evaluationType = ref('quick')
-    const langsmithApiKey = ref('')
     
     const systemStatus = reactive({
       initialized: false,
@@ -547,7 +557,8 @@ export default {
     
     const config = reactive({
       openaiApiKey: '',
-      tavilyApiKey: ''
+      tavilyApiKey: '',
+      langsmithApiKey: ''
     })
     
     const exampleQuestions = [
@@ -672,7 +683,8 @@ export default {
       try {
         const response = await axios.post(`${API_BASE_URL}/initialize`, {
           openai_api_key: config.openaiApiKey,
-          tavily_api_key: config.tavilyApiKey
+          tavily_api_key: config.tavilyApiKey,
+          langsmith_api_key: config.langsmithApiKey
         })
         
         if (response.data.success) {
@@ -749,7 +761,7 @@ export default {
         const response = await axios.post(`${API_BASE_URL}/evaluate`, {
           openai_api_key: config.openaiApiKey,
           evaluation_type: evaluationType.value,
-          langsmith_api_key: langsmithApiKey.value || undefined
+          langsmith_api_key: config.langsmithApiKey || undefined
         })
         
         if (response.data.success) {
@@ -790,7 +802,6 @@ export default {
       evaluationRunning,
       evaluationResults,
       evaluationType,
-      langsmithApiKey,
       runEvaluation
     }
   }

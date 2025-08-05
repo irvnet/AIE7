@@ -116,8 +116,21 @@ class AdvancedRetriever:
                 child_splitter=child_splitter,
             )
             
-            # Add documents
-            self.parent_document_retriever.add_documents(self.documents, ids=None)
+            # Add documents with proper error handling
+            try:
+                # Ensure documents have proper metadata
+                processed_docs = []
+                for i, doc in enumerate(self.documents):
+                    if not hasattr(doc, 'metadata') or doc.metadata is None:
+                        doc.metadata = {}
+                    processed_docs.append(doc)
+                
+                self.parent_document_retriever.add_documents(processed_docs)
+                print(f"Successfully added {len(processed_docs)} documents to parent document retriever")
+                
+            except Exception as doc_error:
+                print(f"Error adding documents to parent document retriever: {doc_error}")
+                self.parent_document_retriever = None
             
         except Exception as e:
             print(f"Error setting up parent document retriever: {e}")
@@ -176,14 +189,19 @@ class AdvancedRetriever:
         """
         Main search interface that returns documents
         """
-        if use_advanced and self.ensemble_retriever:
-            # Use ensemble retriever for best results
-            return self.ensemble_retriever.get_relevant_documents(query)
-        elif use_advanced and self.multi_query_retriever:
-            # Fallback to multi-query retriever
-            return self.multi_query_retriever.get_relevant_documents(query)
-        else:
-            # Fallback to simple vector search
+        try:
+            if use_advanced and self.ensemble_retriever:
+                # Use ensemble retriever for best results
+                return self.ensemble_retriever.get_relevant_documents(query)
+            elif use_advanced and self.multi_query_retriever:
+                # Fallback to multi-query retriever
+                return self.multi_query_retriever.get_relevant_documents(query)
+            else:
+                # Fallback to simple vector search
+                return self.vector_store.similarity_search(query, k=k)
+        except Exception as e:
+            print(f"Error in advanced search, falling back to simple search: {e}")
+            # Ultimate fallback to simple vector search
             return self.vector_store.similarity_search(query, k=k)
     
     def search_with_scores(

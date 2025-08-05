@@ -37,6 +37,7 @@ class SystemStatus(BaseModel):
 class InitializeRequest(BaseModel):
     openai_api_key: str
     tavily_api_key: Optional[str] = None
+    langsmith_api_key: Optional[str] = None
 
 class EvaluateRequest(BaseModel):
     openai_api_key: str
@@ -110,26 +111,50 @@ async def get_system_status():
 async def run_evaluation(request: EvaluateRequest):
     """Run the performance evaluation from the admin panel"""
     try:
-        # Set the API keys for the evaluation
+        # Validate API keys first
+        import sys
+        from pathlib import Path
+        sys.path.append(str(Path(__file__).parent.parent.parent))
+        
+        from api_key_manager import APIKeys, validate_api_keys
+        
+        # Create API keys object
+        keys = APIKeys(
+            openai_api_key=request.openai_api_key,
+            langsmith_api_key=request.langsmith_api_key
+        )
+        
+        # Validate keys
+        errors = validate_api_keys(keys)
+        if errors:
+            return {
+                "success": False,
+                "error": f"API key validation failed: {'; '.join(errors)}"
+            }
+        
+        # Set environment variables
         os.environ["OPENAI_API_KEY"] = request.openai_api_key
         if request.langsmith_api_key:
             os.environ["LANGCHAIN_API_KEY"] = request.langsmith_api_key
             os.environ["LANGCHAIN_TRACING_V2"] = "true"
             os.environ["LANGCHAIN_PROJECT"] = "student-loan-assistant-evaluation"
         
-        # Import and run evaluation
-        import sys
-        from pathlib import Path
-        sys.path.append(str(Path(__file__).parent.parent.parent))
-        
+        # Run evaluation
         if request.evaluation_type == "quick":
             # Run quick evaluation
             from evaluation_with_langsmith import run_quick_evaluation
-            results = run_quick_evaluation()
+            results = run_quick_evaluation(request.openai_api_key, request.langsmith_api_key)
         else:
             # Run full evaluation
             from evaluation_with_langsmith import run_full_evaluation_with_progress
-            results = run_full_evaluation_with_progress()
+            results = run_full_evaluation_with_progress(request.openai_api_key, request.langsmith_api_key)
+        
+        # Check if results were returned
+        if results is None:
+            return {
+                "success": False,
+                "error": "Evaluation returned no results"
+            }
         
         if results:
             return {
@@ -152,6 +177,25 @@ async def run_evaluation(request: EvaluateRequest):
 async def initialize_system(request: InitializeRequest):
     """Initialize the RAG system with API keys"""
     try:
+        # Validate API keys first
+        import sys
+        from pathlib import Path
+        sys.path.append(str(Path(__file__).parent.parent.parent))
+        
+        from api_key_manager import APIKeys, validate_api_keys
+        
+        # Create API keys object
+        keys = APIKeys(
+            openai_api_key=request.openai_api_key,
+            tavily_api_key=request.tavily_api_key,
+            langsmith_api_key=request.langsmith_api_key
+        )
+        
+        # Validate keys
+        errors = validate_api_keys(keys)
+        if errors:
+            raise HTTPException(status_code=400, detail=f"API key validation failed: {'; '.join(errors)}")
+        
         # Broadcast initialization start
         progress_message = json.dumps({
             "type": "initialization_progress",
@@ -166,6 +210,10 @@ async def initialize_system(request: InitializeRequest):
         os.environ["OPENAI_API_KEY"] = request.openai_api_key
         if request.tavily_api_key:
             os.environ["TAVILY_API_KEY"] = request.tavily_api_key
+        if request.langsmith_api_key:
+            os.environ["LANGCHAIN_API_KEY"] = request.langsmith_api_key
+            os.environ["LANGCHAIN_TRACING_V2"] = "true"
+            os.environ["LANGCHAIN_PROJECT"] = "student-loan-assistant-evaluation"
 
         # Initialize document loader using proven pattern
         try:
@@ -234,7 +282,8 @@ async def initialize_system(request: InitializeRequest):
             }))
             
             from langchain_community.document_loaders import CSVLoader
-            complaint_loader = CSVLoader("data/complaints.csv", content_columns=["Consumer complaint narrative", "Company public response", "Company response to consumer"])
+            complaint_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "complaints.csv")
+            complaint_loader = CSVLoader(complaint_path, content_columns=["Consumer complaint narrative", "Company public response", "Company response to consumer"])
             complaints = complaint_loader.load()
             
             # Create complaint vector store

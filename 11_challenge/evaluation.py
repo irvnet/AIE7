@@ -413,7 +413,21 @@ class EnhancedRAGASEvaluator:
             
             # Set up document loader and vector store
             document_loader = DocumentLoader()
-            chunks = document_loader.load_documents("data")
+            # Fix path for backend execution
+            data_path = os.path.join(os.path.dirname(__file__), "data")
+            print(f"Loading documents from: {data_path}")
+            
+            # Check if data directory exists
+            if not os.path.exists(data_path):
+                raise FileNotFoundError(f"Data directory not found: {data_path}")
+            
+            chunks = document_loader.load_documents(data_path)
+            
+            # Check if documents were loaded
+            if not chunks:
+                raise ValueError(f"No documents loaded from {data_path}")
+            
+            print(f"Loaded {len(chunks)} document chunks")
             
             embedding_model = OpenAIEmbeddings(
                 model="text-embedding-3-small",
@@ -428,7 +442,8 @@ class EnhancedRAGASEvaluator:
             
             # Set up complaint retriever
             try:
-                complaint_loader = CSVLoader("data/complaints.csv", content_columns=["Consumer complaint narrative", "Company public response", "Company response to consumer"])
+                complaint_path = os.path.join(data_path, "complaints.csv")
+                complaint_loader = CSVLoader(complaint_path, content_columns=["Consumer complaint narrative", "Company public response", "Company response to consumer"])
                 complaints = complaint_loader.load()
                 complaint_vector_store = Qdrant.from_documents(
                     documents=complaints,
@@ -436,7 +451,8 @@ class EnhancedRAGASEvaluator:
                     location=":memory:"
                 )
                 complaint_retriever = complaint_vector_store.as_retriever()
-            except:
+            except Exception as e:
+                print(f"Warning: Could not load complaints data: {e}")
                 complaint_retriever = None
             
             # Initialize multi-agent system with advanced retrieval option
@@ -444,7 +460,8 @@ class EnhancedRAGASEvaluator:
                 rag_retriever=rag_retriever,
                 complaint_retriever=complaint_retriever,
                 tavily_api_key=os.getenv("TAVILY_API_KEY"),
-                use_advanced_retrieval=self.use_advanced_retrieval
+                use_advanced_retrieval=self.use_advanced_retrieval,
+                openai_api_key=openai_api_key
             )
             
             print("Multi-agent system initialized successfully")
