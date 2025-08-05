@@ -13,7 +13,7 @@ import tiktoken
 class DocumentLoader:
     """Handles loading and processing of PDF documents using proven patterns"""
     
-    def __init__(self, chunk_size: int = 750, chunk_overlap: int = 0):
+    def __init__(self, chunk_size: int = 1500, chunk_overlap: int = 150):
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self.text_splitter = self._create_text_splitter()
@@ -66,7 +66,7 @@ def test_document_loader():
     print("=" * 50)
     
     # Initialize loader
-    loader = DocumentLoader(chunk_size=750, chunk_overlap=0)
+    loader = DocumentLoader(chunk_size=1500, chunk_overlap=150)
     
     # Test loading documents
     chunks = loader.load_documents("data")
