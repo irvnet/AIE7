@@ -59,19 +59,48 @@ def create_team_supervisor(
     
     Based on proven pattern from example code lesson 6.
     """
-    system_prompt += f"\n\nYou are a supervisor tasked with managing a conversation between the following workers: {', '.join(team_members)}. Given the following user request, respond with the worker to act next. Each worker will perform a task and respond with their results and status. When each team is finished, you must respond with FINISH."
+    from langchain.output_parsers.openai_functions import JsonOutputFunctionsParser
+    
+    options = ["FINISH"] + team_members
+    function_def = {
+        "name": "route",
+        "description": "Select the next role.",
+        "parameters": {
+            "title": "routeSchema",
+            "type": "object",
+            "properties": {
+                "next": {
+                    "title": "Next",
+                    "anyOf": [
+                        {"enum": options},
+                    ],
+                },
+            },
+            "required": ["next"],
+        },
+    }
     
     prompt = ChatPromptTemplate.from_messages(
         [
             ("system", system_prompt),
             MessagesPlaceholder(variable_name="messages"),
+            (
+                "system",
+                "Given the conversation above, who should act next?"
+                " Or should we FINISH? Select one of: {options}",
+            ),
         ]
+    ).partial(options=str(options), team_members=", ".join(team_members))
+    
+    chain = (
+        prompt
+        | llm.bind_functions(functions=[function_def], function_call="route")
+        | JsonOutputFunctionsParser()
     )
     
     def supervisor(state):
-        messages = state["messages"]
-        response = llm.invoke(messages)
-        return {"next": response.content}
+        result = chain.invoke(state)
+        return {"next": result["next"]}
     
     return supervisor
 
