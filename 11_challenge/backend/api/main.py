@@ -305,7 +305,7 @@ async def initialize_system(request: InitializeRequest):
             from langchain_community.vectorstores import Qdrant
             
             # Use the exact pattern from the examples
-            embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
+            embedding_model = OpenAIEmbeddings(model="text-embedding-3-large")
             manager.vector_store = Qdrant.from_documents(
                 documents=chunks,
                 embedding=embedding_model,

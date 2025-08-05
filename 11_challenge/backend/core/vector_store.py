@@ -14,7 +14,7 @@ from langchain_core.documents import Document
 @dataclass
 class VectorStoreConfig:
     """Configuration for vector store"""
-    embedding_model: str = "text-embedding-3-small"
+    embedding_model: str = "text-embedding-3-large"
     collection_name: str = "student_loan_docs"
     location: str = ":memory:"  # Use in-memory for testing
 

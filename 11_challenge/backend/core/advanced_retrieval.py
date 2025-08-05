@@ -86,7 +86,7 @@ class AdvancedRetriever:
             # Create collection for parent documents
             client.create_collection(
                 collection_name="parent_documents",
-                vectors_config=models.VectorParams(size=1536, distance=models.Distance.COSINE)
+                vectors_config=models.VectorParams(size=3072, distance=models.Distance.COSINE)
             )
             
             # Create vector store for parent documents

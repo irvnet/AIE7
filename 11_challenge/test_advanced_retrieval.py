@@ -38,7 +38,7 @@ def test_advanced_retrieval():
         
         # Create embedding model
         print("🔧 Creating embedding model...")
-        embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
+        embedding_model = OpenAIEmbeddings(model="text-embedding-3-large")
         
         # Create vector store
         print("🗄️ Creating vector store...")
@@ -59,11 +59,11 @@ def test_advanced_retrieval():
         # Get retriever info
         info = advanced_retriever.get_retriever_info()
         print(f"📊 Retriever Info:")
+        print(f"   Optimized Ensemble: {'✅' if info['optimized_ensemble_available'] else '❌'}")
         print(f"   BM25: {'✅' if info['bm25_available'] else '❌'}")
-        print(f"   Multi-Query: {'✅' if info['multi_query_available'] else '❌'}")
-        print(f"   Parent Document: {'✅' if info['parent_document_available'] else '❌'}")
-        print(f"   Compression: {'✅' if info['compression_available'] else '❌'}")
-        print(f"   Ensemble: {'✅' if info['ensemble_available'] else '❌'}")
+        print(f"   Base Retriever: {'✅' if info['base_retriever_available'] else '❌'}")
+        print(f"   Total Documents: {info['total_documents']}")
+        print(f"   Performance: {info['performance']}")
         
         # Test queries
         test_queries = [
@@ -128,15 +128,15 @@ def test_advanced_retrieval():
             if bm25_results:
                 print(f"   Preview: {bm25_results[0].page_content[:100]}...")
         
-        if info['multi_query_available']:
-            print("📝 Multi-Query Retriever:")
-            multi_results = advanced_retriever.multi_query_retriever.get_relevant_documents("loan amounts", k=2)
-            print(f"   Results: {len(multi_results)} documents")
-            if multi_results:
-                print(f"   Preview: {multi_results[0].page_content[:100]}...")
+        if info['base_retriever_available']:
+            print("📝 Base Semantic Retriever:")
+            base_results = advanced_retriever.base_retriever.get_relevant_documents("loan amounts", k=2)
+            print(f"   Results: {len(base_results)} documents")
+            if base_results:
+                print(f"   Preview: {base_results[0].page_content[:100]}...")
         
-        if info['ensemble_available']:
-            print("📝 Ensemble Retriever:")
+        if info['optimized_ensemble_available']:
+            print("📝 Optimized Ensemble Retriever:")
             ensemble_results = advanced_retriever.ensemble_retriever.get_relevant_documents("loan amounts", k=2)
             print(f"   Results: {len(ensemble_results)} documents")
             if ensemble_results:

@@ -41,7 +41,7 @@ class EnhancedRAGASEvaluator:
         self.openai_api_key = openai_api_key
         self.use_advanced_retrieval = use_advanced_retrieval
         self.llm = ChatOpenAI(model="gpt-4o-mini", api_key=openai_api_key)
-        self.embedding_model = OpenAIEmbeddings(model="text-embedding-3-small", api_key=openai_api_key)
+        self.embedding_model = OpenAIEmbeddings(model="text-embedding-3-large", api_key=openai_api_key)
         self.test_cases = []
         self.results = []
         self.multi_agent_system = None
@@ -458,7 +458,7 @@ class EnhancedRAGASEvaluator:
             print(f"Loaded {len(chunks)} document chunks")
             
             embedding_model = OpenAIEmbeddings(
-                model="text-embedding-3-small",
+                model="text-embedding-3-large",
                 api_key=openai_api_key
             )
             vector_store = Qdrant.from_documents(
