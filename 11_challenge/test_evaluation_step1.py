@@ -11,15 +11,32 @@ from pathlib import Path
 # Add backend to path
 sys.path.append(str(Path(__file__).parent / "backend"))
 
+def get_openai_key():
+    """Get OpenAI API key from environment or prompt user"""
+    openai_key = os.getenv("OPENAI_API_KEY")
+    if not openai_key:
+        try:
+            openai_key = input("Please enter your OpenAI API key: ").strip()
+            if not openai_key:
+                print("OpenAI API key is required")
+                return None
+            # Set environment variable for other components
+            os.environ["OPENAI_API_KEY"] = openai_key
+        except KeyboardInterrupt:
+            print("\nTest cancelled")
+            return None
+    else:
+        print("Using OpenAI API key from environment variable")
+    return openai_key
+
 def test_evaluation_initialization():
     """Test that both baseline and advanced evaluators can be initialized"""
     print("🧪 Testing Evaluation Framework Initialization")
     print("=" * 50)
     
-    # Check for API key
-    if not os.getenv("OPENAI_API_KEY"):
-        print("❌ OPENAI_API_KEY not found in environment")
-        print("💡 Set your API key and run again")
+    # Get API key
+    openai_key = get_openai_key()
+    if not openai_key:
         return False
     
     try:
@@ -28,7 +45,7 @@ def test_evaluation_initialization():
         # Test advanced retrieval evaluator
         print("🔧 Testing Advanced Retrieval Evaluator...")
         evaluator_advanced = EnhancedRAGASEvaluator(
-            openai_api_key=os.getenv("OPENAI_API_KEY"),
+            openai_api_key=openai_key,
             use_advanced_retrieval=True
         )
         print("✅ Advanced retrieval evaluator initialized successfully")
@@ -37,7 +54,7 @@ def test_evaluation_initialization():
         # Test baseline retrieval evaluator
         print("🔧 Testing Baseline Retrieval Evaluator...")
         evaluator_baseline = EnhancedRAGASEvaluator(
-            openai_api_key=os.getenv("OPENAI_API_KEY"),
+            openai_api_key=openai_key,
             use_advanced_retrieval=False
         )
         print("✅ Baseline retrieval evaluator initialized successfully")
@@ -46,7 +63,7 @@ def test_evaluation_initialization():
         # Test default behavior (should be advanced)
         print("🔧 Testing Default Evaluator...")
         evaluator_default = EnhancedRAGASEvaluator(
-            openai_api_key=os.getenv("OPENAI_API_KEY")
+            openai_api_key=openai_key
         )
         print("✅ Default evaluator initialized successfully")
         print(f"   use_advanced_retrieval: {evaluator_default.use_advanced_retrieval}")
@@ -65,25 +82,30 @@ def test_multi_agent_system_setup():
     print("\n🔧 Testing Multi-Agent System Setup")
     print("=" * 40)
     
+    # Get API key
+    openai_key = get_openai_key()
+    if not openai_key:
+        return False
+    
     try:
         from evaluation import EnhancedRAGASEvaluator
         
         # Test advanced retrieval setup
         print("🔧 Setting up advanced retrieval multi-agent system...")
         evaluator_advanced = EnhancedRAGASEvaluator(
-            openai_api_key=os.getenv("OPENAI_API_KEY"),
+            openai_api_key=openai_key,
             use_advanced_retrieval=True
         )
-        evaluator_advanced.setup_multi_agent_system(os.getenv("OPENAI_API_KEY"))
+        evaluator_advanced.setup_multi_agent_system(openai_key)
         print("✅ Advanced retrieval multi-agent system setup successful")
         
         # Test baseline retrieval setup
         print("🔧 Setting up baseline retrieval multi-agent system...")
         evaluator_baseline = EnhancedRAGASEvaluator(
-            openai_api_key=os.getenv("OPENAI_API_KEY"),
+            openai_api_key=openai_key,
             use_advanced_retrieval=False
         )
-        evaluator_baseline.setup_multi_agent_system(os.getenv("OPENAI_API_KEY"))
+        evaluator_baseline.setup_multi_agent_system(openai_key)
         print("✅ Baseline retrieval multi-agent system setup successful")
         
         print("\n🎉 All multi-agent system setups successful!")
@@ -100,11 +122,16 @@ def test_synthetic_data_generation():
     print("\n📄 Testing Synthetic Data Generation")
     print("=" * 35)
     
+    # Get API key
+    openai_key = get_openai_key()
+    if not openai_key:
+        return False
+    
     try:
         from evaluation import EnhancedRAGASEvaluator
         
         evaluator = EnhancedRAGASEvaluator(
-            openai_api_key=os.getenv("OPENAI_API_KEY"),
+            openai_api_key=openai_key,
             use_advanced_retrieval=True
         )
         

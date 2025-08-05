@@ -324,6 +324,29 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold text-gray-900">Performance Evaluation</h2>
+          </div>
+          
+          <!-- Evaluation Configuration -->
+          <div class="mb-6 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Evaluation Type:</label>
+                <select v-model="evaluationType" class="w-full p-2 border border-gray-300 rounded">
+                  <option value="quick">Quick Test (1 question, ~30s)</option>
+                  <option value="full">Full Evaluation (10 questions, ~5min)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">LangSmith API Key (Optional):</label>
+                <input 
+                  v-model="langsmithApiKey" 
+                  type="password" 
+                  placeholder="Enter LangSmith API key for tracing"
+                  class="w-full p-2 border border-gray-300 rounded"
+                />
+                <p class="text-xs text-gray-500 mt-1">Provides detailed tracing and analytics</p>
+              </div>
+            </div>
             <button 
               @click="runEvaluation"
               :disabled="evaluationRunning || !systemStatus.initialized"
@@ -334,9 +357,32 @@
           </div>
           
           <div v-if="evaluationResults" class="space-y-6">
-            <!-- Evaluation Status -->
-            <div>
-              <h3 class="text-md font-semibold text-gray-900 mb-3">Evaluation Status</h3>
+            <!-- Quick Evaluation Results -->
+            <div v-if="evaluationType === 'quick' && evaluationResults.advanced">
+              <h3 class="text-md font-semibold text-gray-900 mb-3">Quick Performance Comparison</h3>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-blue-50 rounded-lg p-4">
+                  <span class="text-sm font-medium text-blue-600">Advanced Time</span>
+                  <p class="text-2xl font-bold text-blue-900 mt-1">{{ evaluationResults.advanced.time.toFixed(2) }}s</p>
+                </div>
+                <div class="bg-green-50 rounded-lg p-4">
+                  <span class="text-sm font-medium text-green-600">Baseline Time</span>
+                  <p class="text-2xl font-bold text-green-900 mt-1">{{ evaluationResults.baseline.time.toFixed(2) }}s</p>
+                </div>
+                <div class="bg-purple-50 rounded-lg p-4">
+                  <span class="text-sm font-medium text-purple-600">Speed Improvement</span>
+                  <p class="text-2xl font-bold text-purple-900 mt-1">{{ ((evaluationResults.baseline.time - evaluationResults.advanced.time) / evaluationResults.baseline.time * 100).toFixed(1) }}%</p>
+                </div>
+                <div class="bg-orange-50 rounded-lg p-4">
+                  <span class="text-sm font-medium text-orange-600">Time Saved</span>
+                  <p class="text-2xl font-bold text-orange-900 mt-1">{{ (evaluationResults.baseline.time - evaluationResults.advanced.time).toFixed(2) }}s</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Full Evaluation Results -->
+            <div v-if="evaluationType === 'full' && evaluationResults.aggregate_metrics">
+              <h3 class="text-md font-semibold text-gray-900 mb-3">Full Evaluation Results</h3>
               <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="bg-blue-50 rounded-lg p-4">
                   <span class="text-sm font-medium text-blue-600">Faithfulness</span>
@@ -488,6 +534,8 @@ export default {
     const currentPage = ref('chat')
     const evaluationRunning = ref(false)
     const evaluationResults = ref(null)
+    const evaluationType = ref('quick')
+    const langsmithApiKey = ref('')
     
     const systemStatus = reactive({
       initialized: false,
@@ -697,13 +745,16 @@ export default {
       
       evaluationRunning.value = true
       try {
-        // Call the evaluation endpoint
+        // Call the evaluation endpoint with enhanced options
         const response = await axios.post(`${API_BASE_URL}/evaluate`, {
-          openai_api_key: config.openaiApiKey
+          openai_api_key: config.openaiApiKey,
+          evaluation_type: evaluationType.value,
+          langsmith_api_key: langsmithApiKey.value || undefined
         })
         
         if (response.data.success) {
           evaluationResults.value = response.data.results
+          console.log('Evaluation completed:', response.data)
         } else {
           alert('Evaluation failed: ' + response.data.error)
         }
@@ -738,6 +789,8 @@ export default {
       currentPage,
       evaluationRunning,
       evaluationResults,
+      evaluationType,
+      langsmithApiKey,
       runEvaluation
     }
   }

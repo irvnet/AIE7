@@ -40,6 +40,8 @@ class InitializeRequest(BaseModel):
 
 class EvaluateRequest(BaseModel):
     openai_api_key: str
+    evaluation_type: str = "quick"  # "quick" or "full"
+    langsmith_api_key: Optional[str] = None
 
 # FastAPI app
 app = FastAPI(
@@ -106,25 +108,40 @@ async def get_system_status():
 
 @app.post("/evaluate")
 async def run_evaluation(request: EvaluateRequest):
-    """Run the RAGAS evaluation from the admin panel"""
+    """Run the performance evaluation from the admin panel"""
     try:
-        # Set the API key for the evaluation
+        # Set the API keys for the evaluation
         os.environ["OPENAI_API_KEY"] = request.openai_api_key
+        if request.langsmith_api_key:
+            os.environ["LANGCHAIN_API_KEY"] = request.langsmith_api_key
+            os.environ["LANGCHAIN_TRACING_V2"] = "true"
+            os.environ["LANGCHAIN_PROJECT"] = "student-loan-assistant-evaluation"
         
         # Import and run evaluation
         import sys
         from pathlib import Path
         sys.path.append(str(Path(__file__).parent.parent.parent))
         
-        from evaluation import EnhancedRAGASEvaluator
+        if request.evaluation_type == "quick":
+            # Run quick evaluation
+            from evaluation_with_langsmith import run_quick_evaluation
+            results = run_quick_evaluation()
+        else:
+            # Run full evaluation
+            from evaluation_with_langsmith import run_full_evaluation_with_progress
+            results = run_full_evaluation_with_progress()
         
-        evaluator = EnhancedRAGASEvaluator(request.openai_api_key)
-        results = evaluator.run_evaluation()
-        
-        return {
-            "success": True,
-            "results": results
-        }
+        if results:
+            return {
+                "success": True,
+                "evaluation_type": request.evaluation_type,
+                "results": results
+            }
+        else:
+            return {
+                "success": False,
+                "error": "Evaluation failed to complete"
+            }
     except Exception as e:
         return {
             "success": False,
