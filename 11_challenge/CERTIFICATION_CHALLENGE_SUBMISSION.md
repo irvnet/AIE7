@@ -3,7 +3,7 @@
 
 **Student:** Richard I.
 **Date:** 2025.Aug.05
-**GitHub Repo:** [Your Repo Link]  
+**GitHub Repo:** https://github.com/irvnet/AIE7/blob/s11-challenge/11_challenge/README.md 
 **Demo Video:** [Loom Video Link]
 
 ---
