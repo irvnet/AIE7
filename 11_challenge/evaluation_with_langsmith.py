@@ -26,16 +26,30 @@ def setup_langsmith():
         print("⚠️  LangSmith not available - continuing without tracing")
         return False
 
-def run_quick_evaluation(openai_key=None, langsmith_key=None):
+def run_quick_evaluation(openai_key=None, langsmith_key=None, progress_callback=None):
     """Run a quick evaluation to test the comparison"""
     print("🚀 Quick Performance Comparison")
     print("=" * 50)
+    print(f"🔍 Progress callback provided: {progress_callback is not None}")
+    if progress_callback:
+        print(f"🔍 Progress callback type: {type(progress_callback)}")
+        # Test the callback immediately
+        try:
+            progress_callback({
+                "type": "evaluation_progress",
+                "step": "starting",
+                "message": "Starting quick evaluation...",
+                "progress": 0
+            })
+            print("✅ Progress callback test successful")
+        except Exception as e:
+            print(f"❌ Progress callback test failed: {e}")
     
     # Collect and validate API keys
     try:
         from api_key_manager import get_api_keys, APIKeys
         
-        if openai_key and langsmith_key:
+        if openai_key:
             # Use provided keys
             keys = APIKeys(
                 openai_api_key=openai_key,
@@ -56,6 +70,18 @@ def run_quick_evaluation(openai_key=None, langsmith_key=None):
         
         print("✅ All API keys validated successfully")
         
+        # Broadcast progress
+        if progress_callback:
+            print(f"📡 Calling progress callback for validation step")
+            progress_callback({
+                "type": "evaluation_progress",
+                "step": "validating",
+                "message": "Validating API keys...",
+                "progress": 10
+            })
+        else:
+            print(f"❌ No progress callback provided")
+        
     except Exception as e:
         print(f"❌ Error collecting API keys: {e}")
         return None
@@ -65,6 +91,14 @@ def run_quick_evaluation(openai_key=None, langsmith_key=None):
     
     try:
         from evaluation import EnhancedRAGASEvaluator
+        
+        if progress_callback:
+            progress_callback({
+                "type": "evaluation_progress",
+                "step": "advanced_setup",
+                "message": "Setting up advanced retrieval system...",
+                "progress": 20
+            })
         
         # Test with just 2 questions for quick comparison
         print("\n🔧 Testing Advanced Retrieval...")
@@ -77,6 +111,14 @@ def run_quick_evaluation(openai_key=None, langsmith_key=None):
         print("Setting up advanced retrieval multi-agent system...")
         evaluator_advanced.setup_multi_agent_system(keys.openai_api_key)
         
+        if progress_callback:
+            progress_callback({
+                "type": "evaluation_progress",
+                "step": "advanced_evaluation",
+                "message": "Running advanced retrieval test...",
+                "progress": 30
+            })
+        
         # Test single question
         test_question = "What is the maximum loan amount for dependent undergraduate students?"
         print(f"Question: {test_question}")
@@ -88,6 +130,22 @@ def run_quick_evaluation(openai_key=None, langsmith_key=None):
         print(f"Advanced Response: {response_advanced[:200]}...")
         print(f"Advanced Time: {advanced_time:.2f}s")
         
+        if progress_callback:
+            progress_callback({
+                "type": "evaluation_progress",
+                "step": "advanced_complete",
+                "message": "Advanced retrieval test complete!",
+                "progress": 50
+            })
+        
+        if progress_callback:
+            progress_callback({
+                "type": "evaluation_progress",
+                "step": "baseline_setup",
+                "message": "Setting up baseline retrieval system...",
+                "progress": 60
+            })
+        
         print("\n🔧 Testing Baseline Retrieval...")
         evaluator_baseline = EnhancedRAGASEvaluator(
             openai_api_key=keys.openai_api_key,
@@ -98,12 +156,36 @@ def run_quick_evaluation(openai_key=None, langsmith_key=None):
         print("Setting up baseline retrieval multi-agent system...")
         evaluator_baseline.setup_multi_agent_system(keys.openai_api_key)
         
+        if progress_callback:
+            progress_callback({
+                "type": "evaluation_progress",
+                "step": "baseline_evaluation",
+                "message": "Running baseline retrieval test...",
+                "progress": 70
+            })
+        
         start_time = time.time()
         response_baseline = evaluator_baseline.multi_agent_system.process_query(test_question)
         baseline_time = time.time() - start_time
         
         print(f"Baseline Response: {response_baseline[:200]}...")
         print(f"Baseline Time: {baseline_time:.2f}s")
+        
+        if progress_callback:
+            progress_callback({
+                "type": "evaluation_progress",
+                "step": "baseline_complete",
+                "message": "Baseline retrieval test complete!",
+                "progress": 80
+            })
+        
+        if progress_callback:
+            progress_callback({
+                "type": "evaluation_progress",
+                "step": "comparing",
+                "message": "Comparing results...",
+                "progress": 90
+            })
         
         # Quick comparison
         print("\n" + "="*50)
@@ -117,6 +199,14 @@ def run_quick_evaluation(openai_key=None, langsmith_key=None):
         # Response quality comparison (simple length comparison)
         print(f"\nAdvanced Response Length: {len(response_advanced)} chars")
         print(f"Baseline Response Length: {len(response_baseline)} chars")
+        
+        if progress_callback:
+            progress_callback({
+                "type": "evaluation_progress",
+                "step": "complete",
+                "message": "Quick evaluation complete! Results ready.",
+                "progress": 100
+            })
         
         return {
             "advanced": {
@@ -137,7 +227,7 @@ def run_quick_evaluation(openai_key=None, langsmith_key=None):
         traceback.print_exc()
         return None
 
-def run_full_evaluation_with_progress(openai_key=None, langsmith_key=None):
+def run_full_evaluation_with_progress(openai_key=None, langsmith_key=None, progress_callback=None):
     """Run full evaluation with progress tracking"""
     print("🚀 Full Performance Evaluation with Progress Tracking")
     print("=" * 60)
@@ -146,7 +236,7 @@ def run_full_evaluation_with_progress(openai_key=None, langsmith_key=None):
     try:
         from api_key_manager import get_api_keys, APIKeys
         
-        if openai_key and langsmith_key:
+        if openai_key:
             # Use provided keys
             keys = APIKeys(
                 openai_api_key=openai_key,
@@ -167,6 +257,15 @@ def run_full_evaluation_with_progress(openai_key=None, langsmith_key=None):
         
         print("✅ All API keys validated successfully")
         
+        # Broadcast progress
+        if progress_callback:
+            progress_callback({
+                "type": "evaluation_progress",
+                "step": "validating",
+                "message": "Validating API keys...",
+                "progress": 5
+            })
+        
     except Exception as e:
         print(f"❌ Error collecting API keys: {e}")
         return None
@@ -177,14 +276,52 @@ def run_full_evaluation_with_progress(openai_key=None, langsmith_key=None):
     try:
         from evaluation import EnhancedRAGASEvaluator
         
+        if progress_callback:
+            progress_callback({
+                "type": "evaluation_progress",
+                "step": "advanced_setup",
+                "message": "Setting up advanced retrieval system...",
+                "progress": 10
+            })
+        
         print("\n📊 Running Advanced Retrieval Evaluation...")
         evaluator_advanced = EnhancedRAGASEvaluator(
             openai_api_key=keys.openai_api_key,
             use_advanced_retrieval=True
         )
         
+        if progress_callback:
+            progress_callback({
+                "type": "evaluation_progress",
+                "step": "advanced_evaluation",
+                "message": "Running advanced retrieval evaluation (10 test cases)...",
+                "progress": 20
+            })
+        
         # Run evaluation with progress
-        results_advanced = evaluator_advanced.run_evaluation()
+        print("Starting advanced evaluation...")
+        results_advanced = evaluator_advanced.run_evaluation(progress_callback)
+        print(f"Advanced evaluation results: {type(results_advanced)}")
+        if results_advanced:
+            print(f"Advanced results keys: {list(results_advanced.keys()) if isinstance(results_advanced, dict) else 'Not a dict'}")
+        else:
+            print("Advanced evaluation returned None")
+        
+        if progress_callback:
+            progress_callback({
+                "type": "evaluation_progress",
+                "step": "advanced_complete",
+                "message": "Advanced retrieval evaluation complete!",
+                "progress": 50
+            })
+        
+        if progress_callback:
+            progress_callback({
+                "type": "evaluation_progress",
+                "step": "baseline_setup",
+                "message": "Setting up baseline retrieval system...",
+                "progress": 55
+            })
         
         print("\n📊 Running Baseline Retrieval Evaluation...")
         evaluator_baseline = EnhancedRAGASEvaluator(
@@ -192,8 +329,38 @@ def run_full_evaluation_with_progress(openai_key=None, langsmith_key=None):
             use_advanced_retrieval=False
         )
         
+        if progress_callback:
+            progress_callback({
+                "type": "evaluation_progress",
+                "step": "baseline_evaluation",
+                "message": "Running baseline retrieval evaluation (10 test cases)...",
+                "progress": 60
+            })
+        
         # Run evaluation with progress
-        results_baseline = evaluator_baseline.run_evaluation()
+        print("Starting baseline evaluation...")
+        results_baseline = evaluator_baseline.run_evaluation(progress_callback)
+        print(f"Baseline evaluation results: {type(results_baseline)}")
+        if results_baseline:
+            print(f"Baseline results keys: {list(results_baseline.keys()) if isinstance(results_baseline, dict) else 'Not a dict'}")
+        else:
+            print("Baseline evaluation returned None")
+        
+        if progress_callback:
+            progress_callback({
+                "type": "evaluation_progress",
+                "step": "baseline_complete",
+                "message": "Baseline retrieval evaluation complete!",
+                "progress": 80
+            })
+        
+        if progress_callback:
+            progress_callback({
+                "type": "evaluation_progress",
+                "step": "comparing",
+                "message": "Comparing results and generating report...",
+                "progress": 85
+            })
         
         # Print comparison
         print("\n" + "="*80)
@@ -233,6 +400,28 @@ def run_full_evaluation_with_progress(openai_key=None, langsmith_key=None):
         print(f"Baseline: {baseline_overall:.3f}")
         print(f"Advanced: {advanced_overall:.3f}")
         print(f"Improvement: {overall_improvement:+.3f}")
+        
+        if progress_callback:
+            progress_callback({
+                "type": "evaluation_progress",
+                "step": "complete",
+                "message": "Evaluation complete! Results ready.",
+                "progress": 100
+            })
+        
+        # Debug final results
+        print(f"\nFinal results structure:")
+        print(f"Baseline type: {type(results_baseline)}")
+        print(f"Advanced type: {type(results_advanced)}")
+        
+        if results_baseline and results_advanced:
+            print("✅ Both evaluations completed successfully")
+        else:
+            print("❌ One or both evaluations failed")
+            if not results_baseline:
+                print("❌ Baseline evaluation failed")
+            if not results_advanced:
+                print("❌ Advanced evaluation failed")
         
         return {
             "baseline": results_baseline,

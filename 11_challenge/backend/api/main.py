@@ -12,6 +12,8 @@ import asyncio
 import json
 import os
 import sys
+import threading
+from queue import Queue
 from pathlib import Path
 
 # Add backend to path for imports
@@ -70,6 +72,7 @@ class ConnectionManager:
         self.retriever = None
         self.complaint_retriever = None
         self.multi_agent_system = None
+        self.progress_queue = Queue()
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
@@ -139,15 +142,65 @@ async def run_evaluation(request: EvaluateRequest):
             os.environ["LANGCHAIN_TRACING_V2"] = "true"
             os.environ["LANGCHAIN_PROJECT"] = "student-loan-assistant-evaluation"
         
-        # Run evaluation
-        if request.evaluation_type == "quick":
-            # Run quick evaluation
-            from evaluation_with_langsmith import run_quick_evaluation
-            results = run_quick_evaluation(request.openai_api_key, request.langsmith_api_key)
-        else:
-            # Run full evaluation
-            from evaluation_with_langsmith import run_full_evaluation_with_progress
-            results = run_full_evaluation_with_progress(request.openai_api_key, request.langsmith_api_key)
+        # Create progress callback function that uses queue
+        def progress_callback(progress_data):
+            print(f"🔔 Progress callback called: {progress_data}")
+            try:
+                # Put progress data in queue for async processing
+                manager.progress_queue.put(progress_data)
+                print(f"✅ Progress data queued: {progress_data}")
+            except Exception as e:
+                print(f"❌ Error in progress callback: {e}")
+                print(f"Progress: {progress_data}")
+        
+        # Run evaluation in thread and process progress in main async context
+        import concurrent.futures
+        
+        async def run_evaluation_with_progress():
+            # Start progress processing task
+            async def process_progress():
+                while True:
+                    try:
+                        progress_data = manager.progress_queue.get_nowait()
+                        await manager.broadcast(json.dumps(progress_data))
+                        print(f"📡 Broadcasted progress: {progress_data}")
+                    except:
+                        await asyncio.sleep(0.1)
+            
+            progress_task = asyncio.create_task(process_progress())
+            
+            # Run evaluation in thread pool
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                if request.evaluation_type == "quick":
+                    from evaluation_with_langsmith import run_quick_evaluation
+                    results = await asyncio.get_event_loop().run_in_executor(
+                        executor, 
+                        run_quick_evaluation,
+                        request.openai_api_key, 
+                        request.langsmith_api_key,
+                        progress_callback
+                    )
+                else:
+                    from evaluation_with_langsmith import run_full_evaluation_with_progress
+                    results = await asyncio.get_event_loop().run_in_executor(
+                        executor, 
+                        run_full_evaluation_with_progress,
+                        request.openai_api_key, 
+                        request.langsmith_api_key,
+                        progress_callback
+                    )
+            
+            # Cancel progress task
+            progress_task.cancel()
+            try:
+                await progress_task
+            except asyncio.CancelledError:
+                pass
+            
+            return results
+        
+        # Run the evaluation with progress processing
+        results = await run_evaluation_with_progress()
         
         # Check if results were returned
         if results is None:
@@ -334,6 +387,8 @@ async def initialize_system(request: InitializeRequest):
             
         except Exception as e:
             print(f"Multi-agent system error: {e}")
+            import traceback
+            traceback.print_exc()
             raise HTTPException(status_code=500, detail=f"Multi-agent system setup failed: {str(e)}")
         
         # Mark system as initialized

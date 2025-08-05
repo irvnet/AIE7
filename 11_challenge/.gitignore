@@ -142,6 +142,9 @@ example-code/
 .env.test.local
 .env.production.local
 
+# Multi-agent system temporary content
+content/
+
 # Temporary files
 *.swp
 *.swo

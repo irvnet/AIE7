@@ -333,19 +333,43 @@ class EnhancedRAGASEvaluator:
         
         return coordination_score
     
-    def run_evaluation(self) -> Dict[str, Any]:
+    def run_evaluation(self, progress_callback=None) -> Dict[str, Any]:
         """Run the complete enhanced RAGAS evaluation with multi-agent system"""
         print("Setting up multi-agent system...")
-        self.setup_multi_agent_system(self.openai_api_key)
+        try:
+            self.setup_multi_agent_system(self.openai_api_key)
+            print("✅ Multi-agent system setup complete")
+        except Exception as e:
+            print(f"❌ Error setting up multi-agent system: {e}")
+            return None
         
         print("Generating test cases...")
         test_cases = self.generate_synthetic_test_data()
+        print(f"✅ Generated {len(test_cases)} test cases")
+        
+        if progress_callback:
+            progress_callback({
+                "type": "evaluation_progress",
+                "step": "evaluation_start",
+                "message": f"Starting evaluation of {len(test_cases)} test cases...",
+                "progress": 25
+            })
         
         print(f"Running evaluation on {len(test_cases)} test cases...")
         
         results = []
         for i, test_case in enumerate(test_cases):
             print(f"Evaluating test case {i+1}/{len(test_cases)}: {test_case.question[:50]}...")
+            
+            # Update progress for each test case
+            if progress_callback:
+                progress_percent = 25 + (i / len(test_cases)) * 60  # 25% to 85%
+                progress_callback({
+                    "type": "evaluation_progress",
+                    "step": "evaluating",
+                    "message": f"Evaluating test case {i+1}/{len(test_cases)}: {test_case.question[:50]}...",
+                    "progress": int(progress_percent)
+                })
             
             # Get multi-agent response
             try:
@@ -396,11 +420,15 @@ class EnhancedRAGASEvaluator:
         }
         
         self.results = results
-        return {
+        
+        final_results = {
             "detailed_results": results,
             "aggregate_metrics": aggregate_metrics,
             "results_by_category": df.groupby("category")[["faithfulness", "relevance", "context_precision", "context_recall", "tool_call_accuracy", "agent_goal_accuracy", "multi_agent_coordination"]].mean().to_dict()
         }
+        
+        print(f"✅ Evaluation complete. Returning results with keys: {list(final_results.keys())}")
+        return final_results
     
     def setup_multi_agent_system(self, openai_api_key: str):
         """Set up the multi-agent system for evaluation"""

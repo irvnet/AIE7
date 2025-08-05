@@ -367,7 +367,28 @@
             </button>
           </div>
           
-          <div v-if="evaluationResults" class="space-y-6">
+          <!-- Evaluation Progress -->
+          <div v-if="evaluationRunning && evaluationProgress" class="mb-6">
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-medium text-blue-800">{{ evaluationProgress.message }}</span>
+                  <span class="text-sm text-blue-600">{{ evaluationProgress.progress }}%</span>
+                </div>
+                <div class="w-full bg-blue-200 rounded-full h-2">
+                  <div 
+                    class="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                    :style="{ width: evaluationProgress.progress + '%' }"
+                  ></div>
+                </div>
+                <div class="text-xs text-blue-600">
+                  Step: {{ evaluationProgress.step }}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div v-if="evaluationResults && !evaluationRunning" class="space-y-6">
             <!-- Quick Evaluation Results -->
             <div v-if="evaluationType === 'quick' && evaluationResults.advanced">
               <h3 class="text-md font-semibold text-gray-900 mb-3">Quick Performance Comparison</h3>
@@ -392,31 +413,81 @@
             </div>
             
             <!-- Full Evaluation Results -->
-            <div v-if="evaluationType === 'full' && evaluationResults.aggregate_metrics">
+            <div v-if="evaluationType === 'full' && evaluationResults.advanced && evaluationResults.baseline">
               <h3 class="text-md font-semibold text-gray-900 mb-3">Full Evaluation Results</h3>
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="bg-blue-50 rounded-lg p-4">
-                  <span class="text-sm font-medium text-blue-600">Faithfulness</span>
-                  <p class="text-2xl font-bold text-blue-900 mt-1">{{ evaluationResults.aggregate_metrics?.faithfulness?.toFixed(2) || 'N/A' }}</p>
+              
+              <!-- Comparison Summary -->
+              <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                <h4 class="text-sm font-semibold text-gray-900 mb-2">Performance Comparison</h4>
+                <div class="grid grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <p class="text-gray-600">Overall Improvement</p>
+                    <p class="text-lg font-bold text-green-600">{{ evaluationResults.comparison?.overall_improvement?.toFixed(3) || 'N/A' }}</p>
+                  </div>
+                  <div>
+                    <p class="text-gray-600">Baseline Score</p>
+                    <p class="text-lg font-bold text-blue-600">{{ evaluationResults.baseline?.aggregate_metrics?.overall_score?.toFixed(3) || 'N/A' }}</p>
+                  </div>
+                  <div>
+                    <p class="text-gray-600">Advanced Score</p>
+                    <p class="text-lg font-bold text-purple-600">{{ evaluationResults.advanced?.aggregate_metrics?.overall_score?.toFixed(3) || 'N/A' }}</p>
+                  </div>
                 </div>
-                <div class="bg-green-50 rounded-lg p-4">
-                  <span class="text-sm font-medium text-green-600">Relevance</span>
-                  <p class="text-2xl font-bold text-green-900 mt-1">{{ evaluationResults.aggregate_metrics?.relevance?.toFixed(2) || 'N/A' }}</p>
+              </div>
+              
+              <!-- Advanced vs Baseline Metrics -->
+              <div class="grid grid-cols-2 gap-6">
+                <!-- Advanced Metrics -->
+                <div>
+                  <h4 class="text-sm font-semibold text-purple-900 mb-3">Advanced Retrieval</h4>
+                  <div class="space-y-3">
+                    <div class="bg-purple-50 p-3 rounded-lg">
+                      <p class="text-sm text-purple-600 font-medium">Faithfulness</p>
+                      <p class="text-xl font-bold text-purple-900">{{ evaluationResults.advanced?.aggregate_metrics?.faithfulness?.toFixed(3) || 'N/A' }}</p>
+                    </div>
+                    <div class="bg-purple-50 p-3 rounded-lg">
+                      <p class="text-sm text-purple-600 font-medium">Relevance</p>
+                      <p class="text-xl font-bold text-purple-900">{{ evaluationResults.advanced?.aggregate_metrics?.relevance?.toFixed(3) || 'N/A' }}</p>
+                    </div>
+                    <div class="bg-purple-50 p-3 rounded-lg">
+                      <p class="text-sm text-purple-600 font-medium">Tool Call Accuracy</p>
+                      <p class="text-xl font-bold text-purple-900">{{ evaluationResults.advanced?.aggregate_metrics?.tool_call_accuracy?.toFixed(3) || 'N/A' }}</p>
+                    </div>
+                    <div class="bg-purple-50 p-3 rounded-lg">
+                      <p class="text-sm text-purple-600 font-medium">Multi-Agent Coordination</p>
+                      <p class="text-xl font-bold text-purple-900">{{ evaluationResults.advanced?.aggregate_metrics?.multi_agent_coordination?.toFixed(3) || 'N/A' }}</p>
+                    </div>
+                  </div>
                 </div>
-                <div class="bg-purple-50 rounded-lg p-4">
-                  <span class="text-sm font-medium text-purple-600">Tool Accuracy</span>
-                  <p class="text-2xl font-bold text-purple-900 mt-1">{{ evaluationResults.aggregate_metrics?.tool_call_accuracy?.toFixed(2) || 'N/A' }}</p>
-                </div>
-                <div class="bg-orange-50 rounded-lg p-4">
-                  <span class="text-sm font-medium text-orange-600">Coordination</span>
-                  <p class="text-2xl font-bold text-orange-900 mt-1">{{ evaluationResults.aggregate_metrics?.multi_agent_coordination?.toFixed(2) || 'N/A' }}</p>
+                
+                <!-- Baseline Metrics -->
+                <div>
+                  <h4 class="text-sm font-semibold text-blue-900 mb-3">Baseline Retrieval</h4>
+                  <div class="space-y-3">
+                    <div class="bg-blue-50 p-3 rounded-lg">
+                      <p class="text-sm text-blue-600 font-medium">Faithfulness</p>
+                      <p class="text-xl font-bold text-blue-900">{{ evaluationResults.baseline?.aggregate_metrics?.faithfulness?.toFixed(3) || 'N/A' }}</p>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-lg">
+                      <p class="text-sm text-blue-600 font-medium">Relevance</p>
+                      <p class="text-xl font-bold text-blue-900">{{ evaluationResults.baseline?.aggregate_metrics?.relevance?.toFixed(3) || 'N/A' }}</p>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-lg">
+                      <p class="text-sm text-blue-600 font-medium">Tool Call Accuracy</p>
+                      <p class="text-xl font-bold text-blue-900">{{ evaluationResults.baseline?.aggregate_metrics?.tool_call_accuracy?.toFixed(3) || 'N/A' }}</p>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-lg">
+                      <p class="text-sm text-blue-600 font-medium">Multi-Agent Coordination</p>
+                      <p class="text-xl font-bold text-blue-900">{{ evaluationResults.baseline?.aggregate_metrics?.multi_agent_coordination?.toFixed(3) || 'N/A' }}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
             <!-- Detailed Results Table -->
-            <div v-if="evaluationResults && evaluationResults.detailed_results" class="mt-6">
-              <h3 class="text-md font-semibold text-gray-900 mb-3">Detailed Test Results</h3>
+            <div v-if="evaluationType === 'full' && evaluationResults.advanced && evaluationResults.advanced.detailed_results" class="mt-6">
+              <h3 class="text-md font-semibold text-gray-900 mb-3">Detailed Test Results (Advanced)</h3>
               <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                   <thead class="bg-gray-50">
@@ -429,7 +500,7 @@
                     </tr>
                   </thead>
                   <tbody class="bg-white divide-y divide-gray-200">
-                    <tr v-for="result in evaluationResults.detailed_results.slice(0, 5)" :key="result.question">
+                    <tr v-for="result in evaluationResults.advanced.detailed_results.slice(0, 5)" :key="result.question">
                       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ result.question.substring(0, 50) }}...</td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ result.category }}</td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ result.faithfulness?.toFixed(2) || 'N/A' }}</td>
@@ -546,6 +617,7 @@ export default {
     const evaluationRunning = ref(false)
     const evaluationResults = ref(null)
     const evaluationType = ref('quick')
+    const evaluationProgress = ref(null)
     
     const systemStatus = reactive({
       initialized: false,
@@ -586,7 +658,7 @@ export default {
       ws.value = new WebSocket(`ws://localhost:8000/ws/chat`)
       
       ws.value.onopen = () => {
-        console.log('WebSocket connected')
+        console.log('✅ WebSocket connected successfully')
       }
       
       ws.value.onmessage = (event) => {
@@ -614,6 +686,19 @@ export default {
               initializationProgress.value = 0
             }, 2000)
           }
+        } else if (data.type === 'evaluation_progress') {
+          // Handle evaluation progress
+          console.log('📊 Received evaluation progress:', data)
+          evaluationProgress.value = data
+          
+          // Clear progress when complete
+          if (data.step === 'complete') {
+            setTimeout(() => {
+              evaluationProgress.value = null
+            }, 3000)
+          }
+        } else {
+          console.log('🔍 Received unknown message type:', data.type, data)
         }
       }
       
@@ -622,7 +707,7 @@ export default {
       }
       
       ws.value.onclose = () => {
-        console.log('WebSocket disconnected')
+        console.log('❌ WebSocket disconnected')
       }
     }
     
@@ -756,6 +841,8 @@ export default {
       }
       
       evaluationRunning.value = true
+      evaluationProgress.value = null // Clear any previous progress
+      evaluationResults.value = null // Clear any previous results
       try {
         // Call the evaluation endpoint with enhanced options
         const response = await axios.post(`${API_BASE_URL}/evaluate`, {
@@ -802,6 +889,7 @@ export default {
       evaluationRunning,
       evaluationResults,
       evaluationType,
+      evaluationProgress,
       runEvaluation
     }
   }

@@ -66,7 +66,11 @@ class AdvancedRetriever:
         
         # 2. Multi-Query Retriever (using the base vector store retriever)
         from langchain_openai import ChatOpenAI
-        llm = ChatOpenAI(model="gpt-4o-mini")
+        import os
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY environment variable must be set for advanced retrieval")
+        llm = ChatOpenAI(model="gpt-4o-mini", api_key=api_key)
         base_retriever = self.vector_store.as_retriever()
         self.multi_query_retriever = MultiQueryRetriever.from_llm(
             retriever=base_retriever, 
