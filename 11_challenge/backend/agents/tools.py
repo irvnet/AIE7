@@ -5,10 +5,55 @@ Based on proven patterns from example code lessons 5-9
 
 import os
 import uuid
+import re
+from datetime import datetime
 from typing import Annotated, Dict, List, Optional
 from pathlib import Path
 from langchain_core.tools import tool
 from langchain_community.tools.tavily_search import TavilySearchResults
+
+
+def _is_current_information(text: str, current_year: int, current_month: int) -> bool:
+    """Check if information is current (within 12 months)."""
+    # Look for year patterns
+    year_pattern = r'\b(20\d{2})\b'
+    years = re.findall(year_pattern, text)
+    
+    if not years:
+        return True  # If no year found, assume current
+    
+    # Count current vs old years
+    current_years = [y for y in years if int(y) >= current_year - 1]
+    old_years = [y for y in years if int(y) < current_year - 1]
+    
+    # If there are more old years than current years, reject
+    if len(old_years) > len(current_years):
+        print(f"    ⚠️  Rejecting: {len(old_years)} old years vs {len(current_years)} current years")
+        return False
+    
+    # Additional check: if text contains old years prominently, reject it
+    old_year_patterns = [
+        r'\b2023\b',  # Reject 2023 information
+        r'\b2022\b',  # Reject 2022 information
+        r'\b2021\b',  # Reject 2021 information
+        r'\b2020\b',  # Reject 2020 information
+        r'\b2019\b',  # Reject 2019 information
+        r'\b2018\b',  # Reject 2018 information
+        r'\b2017\b',  # Reject 2017 information
+        r'\b2016\b',  # Reject 2016 information
+        r'\b2015\b',  # Reject 2015 information
+        r'\b2014\b',  # Reject 2014 information
+    ]
+    
+    for pattern in old_year_patterns:
+        if re.search(pattern, text, re.IGNORECASE):
+            # Check if the old year is mentioned prominently (not just in passing)
+            old_year_matches = re.findall(pattern, text, re.IGNORECASE)
+            if len(old_year_matches) > 1:  # If old year appears more than once, likely outdated
+                print(f"    ⚠️  Rejecting: {len(old_year_matches)} instances of old year pattern")
+                return False
+    
+    return True
 
 
 # Global working directory for document operations
@@ -103,6 +148,148 @@ def edit_document(
 def create_tavily_search_tool():
     """Create Tavily search tool for real-time policy updates."""
     return TavilySearchResults(max_results=5)
+
+
+def create_federal_register_search_tool():
+    """Create search tool for Federal Register - Education Department."""
+    
+    @tool
+    def search_federal_register(
+        query: Annotated[str, "Search query for Federal Register education documents."],
+    ) -> Annotated[str, "Search results from Federal Register - Education Department."]:
+        """Search the Federal Register for Education Department documents and regulations."""
+        try:
+            # Use Tavily with specific site targeting
+            tavily_tool = TavilySearchResults(max_results=3)
+            
+            # For interest rate queries, be more specific
+            if "interest rate" in query.lower() or "interest rates" in query.lower():
+                search_query = f"site:www.federalregister.gov/documents {query} 2024 2025 current academic year"
+            else:
+                search_query = f"site:www.federalregister.gov/documents {query} education department student loans"
+            
+            results = tavily_tool.invoke({"query": search_query})
+            return f"Federal Register Results for '{query}':\n{results}"
+        except Exception as e:
+            return f"Error searching Federal Register: {str(e)}"
+    
+    return search_federal_register
+
+
+def create_education_press_releases_search_tool():
+    """Create search tool for Department of Education Press Releases."""
+    
+    @tool
+    def search_education_press_releases(
+        query: Annotated[str, "Search query for Education Department press releases."],
+    ) -> Annotated[str, "Search results from Department of Education Press Releases."]:
+        """Search Department of Education press releases for student loan information."""
+        try:
+            # Use Tavily with specific site targeting
+            tavily_tool = TavilySearchResults(max_results=3)
+            search_query = f"site:www.ed.gov/news/press-releases {query} student loans"
+            results = tavily_tool.invoke({"query": search_query})
+            return f"Education Press Release Results for '{query}':\n{results}"
+        except Exception as e:
+            return f"Error searching Education Press Releases: {str(e)}"
+    
+    return search_education_press_releases
+
+
+def create_nerdwallet_search_tool():
+    """Create search tool for NerdWallet Student Loans Guide."""
+    
+    @tool
+    def search_nerdwallet_student_loans(
+        query: Annotated[str, "Search query for NerdWallet student loan information."],
+    ) -> Annotated[str, "Search results from NerdWallet Student Loans Guide."]:
+        """Search NerdWallet's student loan guides and resources."""
+        try:
+            # Use Tavily with specific site targeting
+            tavily_tool = TavilySearchResults(max_results=3)
+            search_query = f"site:www.nerdwallet.com {query} student loans"
+            results = tavily_tool.invoke({"query": search_query})
+            return f"NerdWallet Student Loan Results for '{query}':\n{results}"
+        except Exception as e:
+            return f"Error searching NerdWallet: {str(e)}"
+    
+    return search_nerdwallet_student_loans
+
+
+def create_targeted_external_search_tool():
+    """Create a comprehensive external search tool for student loan resources."""
+    
+    @tool
+    def search_external_student_loan_resources(
+        query: Annotated[str, "Search query for external student loan information."],
+    ) -> Annotated[str, "Search results from trusted external student loan resources."]:
+        """Search trusted external sources for student loan information: Federal Register, Education Press Releases, and NerdWallet."""
+        print(f"🔍 EXTERNAL SEARCH CALLED: {query}")
+        
+        current_year = 2025
+        current_month = 1  # January 2025
+        max_attempts = 5
+        
+        for attempt in range(1, max_attempts + 1):
+            print(f"  🔄 Attempt {attempt}/{max_attempts}")
+            try:
+                results = []
+                
+                # Search Federal Register
+                print(f"    📋 Searching Federal Register...")
+                federal_register_tool = create_federal_register_search_tool()
+                federal_results = federal_register_tool.invoke(query)
+                if "Error" not in federal_results and _is_current_information(federal_results, current_year, current_month):
+                    results.append(f"📋 Federal Register:\n{federal_results}")
+                    print(f"    ✅ Federal Register results found (current)")
+                else:
+                    print(f"    ⚠️  Federal Register results outdated or failed")
+                
+                # Search Education Press Releases
+                print(f"    📰 Searching Education Press Releases...")
+                press_releases_tool = create_education_press_releases_search_tool()
+                press_results = press_releases_tool.invoke(query)
+                if "Error" not in press_results and _is_current_information(press_results, current_year, current_month):
+                    results.append(f"📰 Education Press Releases:\n{press_results}")
+                    print(f"    ✅ Education Press Releases results found (current)")
+                else:
+                    print(f"    ⚠️  Education Press Releases results outdated or failed")
+                
+                # Search NerdWallet
+                print(f"    💰 Searching NerdWallet...")
+                nerdwallet_tool = create_nerdwallet_search_tool()
+                nerdwallet_results = nerdwallet_tool.invoke(query)
+                if "Error" not in nerdwallet_results and _is_current_information(nerdwallet_results, current_year, current_month):
+                    results.append(f"💰 NerdWallet Student Loans:\n{nerdwallet_results}")
+                    print(f"    ✅ NerdWallet results found (current)")
+                else:
+                    print(f"    ⚠️  NerdWallet results outdated or failed")
+                
+                if results:
+                    print(f"  ✅ External search completed with {len(results)} current sources")
+                    
+                    # Format the results for better agent processing
+                    formatted_result = "CURRENT INFORMATION FROM EXTERNAL SOURCES:\n\n"
+                    formatted_result += "\n\n".join(results)
+                    formatted_result += f"\n\nIMPORTANT: This information is current (within 12 months) and from official sources."
+                    
+                    return formatted_result
+                else:
+                    print(f"  ⚠️  Attempt {attempt}: No current information found, trying again...")
+                    if attempt < max_attempts:
+                        import time
+                        time.sleep(1)  # Brief pause between attempts
+                    
+            except Exception as e:
+                print(f"  ❌ Attempt {attempt} failed: {str(e)}")
+                if attempt < max_attempts:
+                    import time
+                    time.sleep(1)  # Brief pause between attempts
+        
+        print(f"  ❌ All {max_attempts} attempts failed to find current information")
+        return "I don't have current information available for this query. All external sources returned outdated information (more than 12 months old) or failed to provide results."
+    
+    return search_external_student_loan_resources
 
 
 def create_complaint_reference_tool(complaint_retriever):

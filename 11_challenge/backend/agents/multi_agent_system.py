@@ -62,7 +62,7 @@ class MultiAgentSystem:
         # Initialize working directory
         create_random_subdirectory()
     
-    def process_query(self, query: str, max_iterations: int = 30) -> str:
+    def process_query(self, query: str, max_iterations: int = 50) -> str:
         """Process a user query through the multi-agent system.
         
         Args:
@@ -73,6 +73,19 @@ class MultiAgentSystem:
             Final response from the multi-agent system
         """
         try:
+            # Check if query is student loan related
+            student_loan_keywords = [
+                'student loan', 'loan', 'interest rate', 'federal', 'education', 
+                'financial aid', 'fafsa', 'repayment', 'debt', 'borrower',
+                'subsidized', 'unsubsidized', 'plus loan', 'pell grant'
+            ]
+            
+            query_lower = query.lower()
+            is_student_loan_related = any(keyword in query_lower for keyword in student_loan_keywords)
+            
+            if not is_student_loan_related:
+                return "I'm a student loan assistant. I can help you with questions about federal student loans, financial aid, repayment options, and related topics. For other questions, please ask about student loans or financial aid."
+            
             # Create initial state
             initial_state = {
                 "messages": [HumanMessage(content=query)],

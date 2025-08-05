@@ -27,7 +27,7 @@ class DocWritingState(TypedDict):
 
 
 def create_response_team(llm: ChatOpenAI, complaint_retriever):
-    """Create the response team with document writing agents.
+    """Create the response team with direct answer agents.
     
     Based on proven pattern from example code lesson 6.
     """
@@ -37,100 +37,104 @@ def create_response_team(llm: ChatOpenAI, complaint_retriever):
     complaint_tool = create_complaint_reference_tool(complaint_retriever)
     prelude = create_document_prelude_function()
     
-    # Create DocWriter Agent
-    doc_writer_agent = create_agent(
+    # Create Direct Answer Agent
+    direct_answer_agent = create_agent(
         llm,
-        [write_document, edit_document, read_document],
-        ("You are an expert writing customer assistance responses.\n"
+        [read_document],  # Give it at least one tool to avoid empty array error
+        ("You are an expert student loan advisor who provides clear, direct answers to user questions."
+        " Your role is to take the research information and provide a concise, accurate response."
+        
+        " CRITICAL INSTRUCTIONS:"
+        " 1. If the research contains 'CURRENT INFORMATION FROM EXTERNAL SOURCES', prioritize that information"
+        " 2. For interest rates, clearly state the academic year and source"
+        " 3. Focus on answering the user's question directly with the specific information they requested"
+        " 4. Be helpful, accurate, and concise"
+        " 5. Do not create documents or outlines unless specifically requested"
+        " 6. If you see current 2024-2025 rates, use those instead of any older information"
+        " 7. If the research says 'I don't have current information available', be honest and say you don't have current information"
+        " 8. Never make up information - if you don't have current data, say so clearly"),
+    )
+    direct_answer_node = functools.partial(
+        agent_node, agent=direct_answer_agent, name="DirectAnswer"
+    )
+    
+    # Create Document Writer Agent (for complex requests only)
+    document_writer_agent = create_agent(
+        llm,
+        [write_document, edit_document, read_document, create_outline, complaint_tool],
+        ("You are an expert document writer for complex student loan assistance requests."
+        " Only create documents when the user specifically requests detailed documentation,"
+        " outlines, or comprehensive guides. For simple questions, let the DirectAnswer agent handle it."
         "Below are files currently in your directory:\n{current_files}"),
     )
-    context_aware_doc_writer_agent = prelude | doc_writer_agent
-    doc_writing_node = functools.partial(
-        agent_node, agent=context_aware_doc_writer_agent, name="DocWriter"
+    context_aware_document_writer_agent = prelude | document_writer_agent
+    document_writing_node = functools.partial(
+        agent_node, agent=context_aware_document_writer_agent, name="DocumentWriter"
     )
     
-    # Create NoteTaker Agent
-    note_taking_agent = create_agent(
+    # Create Quality Check Agent
+    quality_check_agent = create_agent(
         llm,
-        [create_outline, read_document, complaint_tool],
-        ("You are an expert senior researcher tasked with writing a customer assistance outline and"
-        " taking notes to craft a customer assistance response.\n{current_files}"),
-    )
-    context_aware_note_taking_agent = prelude | note_taking_agent
-    note_taking_node = functools.partial(
-        agent_node, agent=context_aware_note_taking_agent, name="NoteTaker"
-    )
-    
-    # Create CopyEditor Agent
-    copy_editor_agent = create_agent(
-        llm,
-        [write_document, edit_document, read_document],
-        ("You are an expert copy editor who focuses on fixing grammar, spelling, and tone issues\n"
+        [read_document],
+        ("You are a quality assurance expert who reviews responses for accuracy, clarity, and completeness."
+        " Ensure the response directly answers the user's question and is factually correct."
         "Below are files currently in your directory:\n{current_files}"),
     )
-    context_aware_copy_editor_agent = prelude | copy_editor_agent
-    copy_editing_node = functools.partial(
-        agent_node, agent=context_aware_copy_editor_agent, name="CopyEditor"
+    context_aware_quality_check_agent = prelude | quality_check_agent
+    quality_check_node = functools.partial(
+        agent_node, agent=context_aware_quality_check_agent, name="QualityCheck"
     )
     
-    # Create EmpathyEditor Agent
-    empathy_editor_agent = create_agent(
+    # Create Response Team Supervisor
+    response_supervisor = create_team_supervisor(
         llm,
-        [write_document, edit_document, read_document],
-        ("You are an expert in empathy, compassion, and understanding - you edit the document to make sure it's empathetic and compassionate."
-        "Below are files currently in your directory:\n{current_files}"),
-    )
-    empathy_editor_agent = prelude | empathy_editor_agent
-    empathy_node = functools.partial(
-        agent_node, agent=empathy_editor_agent, name="EmpathyEditor"
-    )
-    
-    # Create Document Writing Team Supervisor
-    doc_writing_supervisor = create_team_supervisor(
-        llm,
-        ("You are a supervisor tasked with managing a conversation between the"
-        " following workers: DocWriter, NoteTaker, EmpathyEditor, CopyEditor. You should always verify the technical"
-        " contents after any edits are made. "
-        "Given the following user request,"
-        " respond with the worker to act next. Each worker will perform a"
-        " task and respond with their results and status. When each team is finished,"
-        " you must respond with FINISH."),
-        ["DocWriter", "NoteTaker", "EmpathyEditor", "CopyEditor"],
+        ("You are a supervisor managing a response team with two workers:"
+        " DirectAnswer (provides direct answers to simple questions) and DocumentWriter (creates documents for complex requests)."
+        
+        " CRITICAL ROUTING RULES:"
+        " 1. Use DirectAnswer for:"
+        "    - Questions about rates, amounts, deadlines, updates, policies"
+        "    - Information requests (what, when, how much, etc.)"
+        "    - Simple factual questions"
+        "    - Status updates and current information"
+        
+        " 2. Use DocumentWriter ONLY for:"
+        "    - User explicitly requests 'create a document', 'write a guide', 'make an outline'"
+        "    - User asks for 'detailed documentation' or 'comprehensive guide'"
+        "    - User wants something saved to a file"
+        
+        " 3. DEFAULT: Always use DirectAnswer unless user specifically asks for document creation"
+        " 4. When the response is complete, respond with FINISH"),
+        ["DirectAnswer", "DocumentWriter"],
     )
     
-    # Create Document Writing Team Graph
-    authoring_graph = StateGraph(DocWritingState)
-    authoring_graph.add_node("DocWriter", doc_writing_node)
-    authoring_graph.add_node("NoteTaker", note_taking_node)
-    authoring_graph.add_node("CopyEditor", copy_editing_node)
-    authoring_graph.add_node("EmpathyEditor", empathy_node)
-    authoring_graph.add_node("supervisor", doc_writing_supervisor)
+    # Create Response Team Graph
+    response_graph = StateGraph(DocWritingState)
+    response_graph.add_node("DirectAnswer", direct_answer_node)
+    response_graph.add_node("DocumentWriter", document_writing_node)
+    response_graph.add_node("supervisor", response_supervisor)
     
     # Add edges
-    authoring_graph.add_edge("DocWriter", "supervisor")
-    authoring_graph.add_edge("NoteTaker", "supervisor")
-    authoring_graph.add_edge("CopyEditor", "supervisor")
-    authoring_graph.add_edge("EmpathyEditor", "supervisor")
+    response_graph.add_edge("DirectAnswer", "supervisor")
+    response_graph.add_edge("DocumentWriter", "supervisor")
     
-    authoring_graph.add_conditional_edges(
+    response_graph.add_conditional_edges(
         "supervisor",
         lambda x: x["next"],
         {
-            "DocWriter": "DocWriter",
-            "NoteTaker": "NoteTaker",
-            "CopyEditor": "CopyEditor",
-            "EmpathyEditor": "EmpathyEditor",
+            "DirectAnswer": "DirectAnswer",
+            "DocumentWriter": "DocumentWriter",
             "FINISH": END,
         },
     )
     
-    authoring_graph.set_entry_point("supervisor")
-    compiled_authoring_graph = authoring_graph.compile()
+    response_graph.set_entry_point("supervisor")
+    compiled_response_graph = response_graph.compile()
     
     # Create chain
-    authoring_chain = (
-        functools.partial(enter_chain, members=authoring_graph.nodes)
-        | compiled_authoring_graph
+    response_chain = (
+        functools.partial(enter_chain, members=response_graph.nodes)
+        | compiled_response_graph
     )
     
-    return authoring_chain 
+    return response_chain 

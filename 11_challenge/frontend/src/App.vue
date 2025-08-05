@@ -638,12 +638,12 @@ export default {
       "What is the maximum loan amount for dependent undergraduate students?",
       "What's the difference between subsidized and unsubsidized loans?",
       
-      // Test Search Agent (External API)
-      "What are the current interest rates for student loans?",
-      "What are the latest updates on student loan forgiveness programs?",
+      // Test Search Agent (External API) - Using specific years for better results
+      "What are the interest rates for student loans in 2025?",
+      "What are the latest updates on student loan forgiveness programs in 2024?",
       
       // Test Multi-Agent Collaboration (Complex Questions)
-      "How do I apply for income-based repayment and what are the current requirements?",
+      "How do I apply for income-based repayment and what are the requirements for 2025?",
       "What are the eligibility requirements for Pell Grants and how do I apply?",
       
       // Test Complaint Data Integration

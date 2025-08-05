@@ -28,11 +28,15 @@ def create_meta_supervisor(llm: ChatOpenAI, research_chain, response_chain):
     # Create Meta-Supervisor Node
     supervisor_node = create_team_supervisor(
         llm,
-        "You are a supervisor tasked with managing a conversation between the"
-        " following teams: Research team, Response team. Given the following user request,"
-        " respond with the worker to act next. Each worker will perform a"
-        " task and respond with their results and status. When all workers are finished,"
-        " you must respond with FINISH.",
+        ("You are a supervisor managing a student loan assistance system with two teams:"
+        " Research team (finds information) and Response team (formats responses)."
+        
+        " IMPORTANT RULES:"
+        " 1. ALWAYS start with Research team to gather information"
+        " 2. Then use Response team to format the information into a clear answer"
+        " 3. For time-sensitive questions (current rates, recent changes), ensure Research team gets current information"
+        " 4. When both teams have completed their work, respond with FINISH"
+        " 5. Never skip the Research team - information gathering is always needed first"),
         ["Research team", "Response team"],
     )
     
