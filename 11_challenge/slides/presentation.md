@@ -133,7 +133,6 @@ All the hours of researching seem wasted since everyting has changed with a new 
 
 </div>
 
-**Why Critical:** A system giving 2023 rates in 2025 would be useless to students.
 
 ---
 
@@ -157,7 +156,7 @@ All the hours of researching seem wasted since everyting has changed with a new 
 - **Combines semantic + keyword search** with 70/30 weighting
 - **100% success rate** across all test cases
 
-**Why This Mattered:** Speed directly impacts user experience. 0.20 seconds vs 13+ seconds makes the difference between a useful tool and a frustrating one.
+**Why This Mattered:** This was a key lesson learned since the system was slow and keyword search alone was very insufficient. Semantic search yielded better, but not necessary accurate results though doing semantic search first, then keyword search worked well. It also provided faster results as the system was initially slow.
 
 </div>
 
