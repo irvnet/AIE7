@@ -162,6 +162,18 @@ All the hours of researching seem wasted since everyting has changed with a new 
 
 ---
 
+## Retrieval Method Performance Comparison
+
+![Retrieval Method Comparison](retrieval_diagram_clean.png)
+
+**Key Insights:**
+- **Ensemble wins** on speed (0.20s) and combines best of both worlds
+- **Multi-Query & Compression** are unacceptably slow for production
+- **BM25 only** is 60% slower than ensemble
+- **Simplified architecture** beats complex multi-method approach
+
+---
+
 # 📊 Quality Assurance: Measure What Matters
 
 <div class="decision">
