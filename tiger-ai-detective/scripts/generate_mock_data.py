@@ -20,84 +20,85 @@ import uuid
 fake = Faker()
 
 # IBM Products Data
+# IBM Products Data - Integration Focus
 IBM_PRODUCTS = [
     {
         "name": "IBM WebSphere Application Server",
         "category": "Application Server",
         "version": "9.0.5",
-        "description": "Enterprise Java application server for building, deploying, and managing applications",
+        "description": "Enterprise Java application server for building, deploying, and managing applications in integration environments",
         "documentation_url": "https://www.ibm.com/docs/en/was/9.0.5"
+    },
+    {
+        "name": "Red Hat OpenShift",
+        "category": "Container Platform",
+        "version": "4.12",
+        "description": "Enterprise Kubernetes platform for running containerized applications and microservices",
+        "documentation_url": "https://docs.openshift.com/container-platform/4.12/"
     },
     {
         "name": "IBM Db2 Database",
         "category": "Database",
         "version": "11.5",
-        "description": "Enterprise database management system with advanced analytics capabilities",
+        "description": "Enterprise database management system with advanced analytics and integration capabilities",
         "documentation_url": "https://www.ibm.com/docs/en/db2/11.5"
     },
     {
         "name": "IBM MQ",
         "category": "Messaging",
         "version": "9.3",
-        "description": "Enterprise messaging middleware for reliable application integration",
+        "description": "Enterprise messaging middleware for reliable application integration and message delivery",
         "documentation_url": "https://www.ibm.com/docs/en/ibm-mq/9.3"
     },
     {
-        "name": "IBM Cloud Pak for Data",
-        "category": "Cloud Platform",
-        "version": "4.7",
-        "description": "Integrated data and AI platform for building and deploying AI applications",
-        "documentation_url": "https://www.ibm.com/docs/en/cloud-pak-data/4.7"
-    },
-    {
-        "name": "IBM Watson Assistant",
-        "category": "AI Services",
-        "version": "2.0",
-        "description": "AI-powered virtual assistant for building conversational interfaces",
-        "documentation_url": "https://www.ibm.com/docs/en/watson-assistant/2.0"
-    },
-    {
-        "name": "IBM Cognos Analytics",
-        "category": "Business Intelligence",
-        "version": "11.2",
-        "description": "Business intelligence and performance management software",
-        "documentation_url": "https://www.ibm.com/docs/en/cognos-analytics/11.2"
-    },
-    {
-        "name": "IBM Sterling B2B Integrator",
+        "name": "IBM App Connect Enterprise",
         "category": "Integration",
-        "version": "6.1",
-        "description": "B2B integration platform for managing trading partner relationships",
-        "documentation_url": "https://www.ibm.com/docs/en/sterling-b2b-integrator/6.1"
+        "version": "12.0",
+        "description": "Enterprise integration platform for connecting applications, data, and APIs across hybrid environments",
+        "documentation_url": "https://www.ibm.com/docs/en/app-connect/12.0"
     },
     {
-        "name": "IBM Tivoli Storage Manager",
-        "category": "Storage Management",
-        "version": "8.1",
-        "description": "Enterprise backup and recovery solution",
-        "documentation_url": "https://www.ibm.com/docs/en/tsm/8.1"
+        "name": "IBM API Connect",
+        "category": "API Management",
+        "version": "10.0",
+        "description": "Complete API management platform for creating, securing, managing, and monetizing APIs",
+        "documentation_url": "https://www.ibm.com/docs/en/api-connect/10.0"
     }
 ]
-
 # Common Support Issues
+# Common Support Issues - Integration Focus
 SUPPORT_ISSUES = [
-    "Performance degradation under high load",
-    "Memory leaks causing system instability",
-    "Database connection pool exhaustion",
-    "SSL/TLS certificate validation failures",
-    "Cluster node communication failures",
-    "Backup and recovery failures",
-    "Integration endpoint authentication issues",
-    "Log file corruption and rotation problems",
-    "Configuration synchronization issues",
-    "Security vulnerability remediation",
-    "High CPU utilization during peak hours",
-    "Network connectivity issues between components",
-    "Data corruption in transaction logs",
-    "Application deployment failures",
-    "License validation and renewal problems"
+    "API Gateway authentication failures between WebSphere and API Connect",
+    "Message queue connection timeouts in OpenShift containerized MQ deployments",
+    "Database connection pool exhaustion in containerized Db2 on OpenShift",
+    "SSL/TLS certificate validation failures in OpenShift to WebSphere communication",
+    "WebSphere cluster node communication failures in hybrid cloud environment",
+    "App Connect integration flow deployment failures in OpenShift",
+    "API Connect rate limiting and throttling issues affecting WebSphere applications",
+    "MQ message delivery failures in hybrid cloud environments",
+    "OpenShift pod scaling and resource allocation problems with Db2",
+    "Cross-platform integration authentication issues between MQ and App Connect",
+    "Container registry connectivity problems affecting OpenShift deployments",
+    "Service mesh routing failures in microservices between WebSphere and API Connect",
+    "Database performance degradation in containerized Db2 on OpenShift",
+    "API versioning and backward compatibility issues in API Connect",
+    "Integration flow monitoring and alerting failures in App Connect",
+    "Cross-platform data transformation errors between Db2 and MQ",
+    "Load balancer configuration issues in OpenShift affecting WebSphere",
+    "Message persistence and recovery problems in MQ cluster",
+    "API security token validation failures in API Connect",
+    "Container resource limits causing application failures in OpenShift",
+    "WebSphere to OpenShift migration authentication issues",
+    "MQ message ordering and delivery guarantees in distributed environment",
+    "App Connect integration flow performance degradation under load",
+    "API Connect API gateway routing failures in multi-region deployment",
+    "Db2 database connection failures in containerized environment",
+    "Cross-product SSL certificate chain validation issues",
+    "Integration flow deadlock scenarios in App Connect",
+    "API Connect rate limiting bypass attempts and security incidents",
+    "OpenShift pod eviction causing MQ message loss",
+    "WebSphere cluster split-brain scenarios in hybrid cloud"
 ]
-
 # Evidence Types
 EVIDENCE_TYPES = [
     "System Logs",
@@ -199,7 +200,7 @@ def generate_support_tickets(db: Session, customers, products, count: int = 200)
             customer_id=random.choice(customers).id,
             product_id=random.choice(products).id,
             title=random.choice(SUPPORT_ISSUES),
-            description=fake.text(max_nb_chars=500),
+            description=random.choice(SUPPORT_ISSUES),
             severity=random.choice(severities),
             status=random.choice(statuses),
             created_at=fake.date_time_between(start_date='-180d', end_date='now', tzinfo=None)
@@ -234,8 +235,8 @@ def generate_cases(db: Session, tickets, customers, products, members, count: in
             product_id=random.choice(products).id,
             assigned_member_id=assigned_member.id,
             title=f"Tiger Team Case: {random.choice(SUPPORT_ISSUES)}",
-            description=fake.text(max_nb_chars=1000),
-            desired_outcome=fake.text(max_nb_chars=300),
+            description=random.choice(SUPPORT_ISSUES) + ". " + fake.text(max_nb_chars=500),
+            desired_outcome="Resolve integration issue and restore normal operations. Provide root cause analysis and preventive measures.",
             priority=random.choice(priorities),
             status=random.choice(statuses),
             research_notes=fake.text(max_nb_chars=800) if random.choice([True, False]) else None,

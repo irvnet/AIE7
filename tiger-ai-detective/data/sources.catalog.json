@@ -1,0 +1,182 @@
+[
+  {
+    "product": "IBM MQ",
+    "category": "Product Documentation",
+    "title": "IBM MQ Documentation Hub",
+    "url": "https://www.ibm.com/docs/en/ibm-mq",
+    "format": "HTML (PDF export available)",
+    "type": "primary",
+    "downloadable_pdf": false
+  },
+  {
+    "product": "IBM MQ",
+    "category": "Product Documentation",
+    "title": "IBM MQ 9.2 \u2013 PDF Documentation Index",
+    "url": "https://www.ibm.com/docs/en/ibm-mq/9.2.x?topic=SSFKSJ_9.2.0/com.ibm.mq.pro.doc/q001040_.html",
+    "format": "PDF",
+    "type": "primary",
+    "downloadable_pdf": true
+  },
+  {
+    "product": "IBM MQ",
+    "category": "Redpaper",
+    "title": "WebSphere MQ Primer: An Introduction to Messaging and WebSphere MQ",
+    "url": "https://www.redbooks.ibm.com/redpapers/pdfs/redp0021.pdf",
+    "format": "PDF",
+    "type": "reference",
+    "downloadable_pdf": true
+  },
+  {
+    "product": "IBM MQ",
+    "category": "Redbook",
+    "title": "IBM MQ V8 Features and Enhancements",
+    "url": "https://www.redbooks.ibm.com/redbooks/pdfs/sg248218.pdf",
+    "format": "PDF",
+    "type": "reference",
+    "downloadable_pdf": true
+  },
+  {
+    "product": "IBM MQ",
+    "category": "Support Knowledge Base",
+    "title": "IBM MQ Support Portal (Troubleshooting & How-tos)",
+    "url": "https://www.ibm.com/support/pages/product/ibm-mq",
+    "format": "HTML",
+    "type": "support",
+    "downloadable_pdf": false
+  },
+  {
+    "product": "WebSphere Application Server",
+    "category": "Product Documentation",
+    "title": "WAS 9.0.5 Documentation Hub",
+    "url": "https://www.ibm.com/docs/en/was/9.0.5?topic=websphere-application-server-overview",
+    "format": "HTML (PDF export available)",
+    "type": "primary",
+    "downloadable_pdf": false
+  },
+  {
+    "product": "WebSphere Application Server",
+    "category": "Redbook",
+    "title": "WebSphere Application Server V8.5 Administration and Configuration Guide",
+    "url": "https://www.redbooks.ibm.com/redbooks/pdfs/sg248056.pdf",
+    "format": "PDF",
+    "type": "reference",
+    "downloadable_pdf": true
+  },
+  {
+    "product": "WebSphere Application Server",
+    "category": "Redbook",
+    "title": "WebSphere Application Server V8: Administration and Configuration",
+    "url": "https://www.redbooks.ibm.com/redbooks/pdfs/sg247971.pdf",
+    "format": "PDF",
+    "type": "reference",
+    "downloadable_pdf": true
+  },
+  {
+    "product": "IBM Db2 (z/OS)",
+    "category": "Product Documentation",
+    "title": "Db2 13 for z/OS Documentation Hub",
+    "url": "https://www.ibm.com/docs/en/db2-for-zos/13.0.0",
+    "format": "HTML (PDF export available)",
+    "type": "primary",
+    "downloadable_pdf": false
+  },
+  {
+    "product": "IBM Db2 (z/OS)",
+    "category": "Redbook",
+    "title": "Db2 13 for z/OS Performance Topics",
+    "url": "https://www.redbooks.ibm.com/redbooks/pdfs/sg248536.pdf",
+    "format": "PDF",
+    "type": "reference",
+    "downloadable_pdf": true
+  },
+  {
+    "product": "IBM Db2 (z/OS)",
+    "category": "Redbook",
+    "title": "DB2 12 for z/OS Technical Overview",
+    "url": "https://www.redbooks.ibm.com/redbooks/pdfs/sg248383.pdf",
+    "format": "PDF",
+    "type": "reference",
+    "downloadable_pdf": true
+  },
+  {
+    "product": "IBM App Connect Enterprise",
+    "category": "Product Documentation",
+    "title": "ACE 12 Documentation Hub (Get started)",
+    "url": "https://www.ibm.com/docs/en/app-connect/12.0.x?topic=enterprise-get-started-app-connect",
+    "format": "HTML (PDF export available in sections)",
+    "type": "primary",
+    "downloadable_pdf": false
+  },
+  {
+    "product": "IBM App Connect Enterprise",
+    "category": "Product Documentation",
+    "title": "ACE 11 Documentation Hub",
+    "url": "https://www.ibm.com/docs/en/app-connect/11.0.0",
+    "format": "HTML (PDF export available in sections)",
+    "type": "primary",
+    "downloadable_pdf": false
+  },
+  {
+    "product": "IBM App Connect (Hybrid Integration)",
+    "category": "Redbook",
+    "title": "A Practical Guide for IBM Hybrid Integration Platform",
+    "url": "https://www.redbooks.ibm.com/redbooks/pdfs/sg248351.pdf",
+    "format": "PDF",
+    "type": "reference",
+    "downloadable_pdf": true
+  },
+  {
+    "product": "IBM API Connect",
+    "category": "Product Documentation",
+    "title": "API Connect Documentation Hub (CD/SaaS)",
+    "url": "https://www.ibm.com/docs/en/api-connect/saas",
+    "format": "HTML (PDF export available in some sections)",
+    "type": "primary",
+    "downloadable_pdf": false
+  },
+  {
+    "product": "IBM API Connect",
+    "category": "Product Documentation",
+    "title": "API Connect 10.0.x CD \u2013 Overview",
+    "url": "https://www.ibm.com/docs/en/api-connect/10.0.x_cd?topic=api-connect-overview",
+    "format": "HTML",
+    "type": "primary",
+    "downloadable_pdf": false
+  },
+  {
+    "product": "IBM API Connect",
+    "category": "Redpaper",
+    "title": "Getting Started with IBM API Connect: Concepts & Architecture",
+    "url": "https://www.redbooks.ibm.com/redpapers/pdfs/redp5349.pdf",
+    "format": "PDF",
+    "type": "reference",
+    "downloadable_pdf": true
+  },
+  {
+    "product": "IBM API Connect",
+    "category": "Redpaper",
+    "title": "Getting Started with IBM API Connect: Scenarios Guide",
+    "url": "https://www.redbooks.ibm.com/redpapers/pdfs/redp5350.pdf",
+    "format": "PDF",
+    "type": "reference",
+    "downloadable_pdf": true
+  },
+  {
+    "product": "Red Hat OpenShift",
+    "category": "Product Documentation",
+    "title": "OpenShift (Red Hat) Documentation Hub",
+    "url": "https://docs.openshift.com/",
+    "format": "HTML (PDF export available per guide)",
+    "type": "primary",
+    "downloadable_pdf": false
+  },
+  {
+    "product": "OpenShift on IBM Cloud",
+    "category": "Product Documentation",
+    "title": "Red Hat OpenShift on IBM Cloud \u2013 Docs",
+    "url": "https://cloud.ibm.com/docs/openshift?topic=openshift-overview",
+    "format": "HTML",
+    "type": "primary",
+    "downloadable_pdf": false
+  }
+]
