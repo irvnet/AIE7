@@ -67,6 +67,62 @@
 - **Data**: Db2 for enterprise data management
 - **Integration Platform**: App Connect for connecting everything
 
+## 🎨 Color Scheme & UI Design
+
+### IBM Carbon Design System (Gray 10 Theme)
+**Implemented**: IBM Carbon Design System with Gray 10 theme for professional, enterprise-grade appearance
+
+#### Core Color Palette:
+- **Background**: `var(--cds-ui-background)` - Very dark grey/black
+- **Layer 1**: `var(--cds-layer-01)` - Dark grey for primary content areas
+- **Layer 2**: `var(--cds-layer-02)` - Medium dark grey for form fields and secondary content
+- **Text Primary**: `var(--cds-text-01)` - White text for main content
+- **Text Secondary**: `var(--cds-text-02)` - Light grey for secondary text
+- **Interactive Elements**: `var(--cds-interactive-01)` - Blue for buttons and links
+- **Borders**: `var(--cds-border-subtle-01)` - Subtle borders for field separation
+
+#### Custom Field Styling:
+**Detail Page Fields** (Case Description, AI Recommendations, Research Data):
+- **Background**: `#393939` (explicit dark grey for maximum contrast)
+- **Text**: `#ffffff` (white for readability)
+- **Border**: `#525252` (medium grey for field definition)
+- **Padding**: `0.75rem` with `0.25rem` border radius
+
+#### Edit Mode Banner:
+- **Background**: `#f8f9fa` (light grey)
+- **Text**: `#212529` (dark grey for contrast)
+- **Border**: `#6c757d` (medium grey left border)
+- **Purpose**: Clear visual indication of edit state with good readability
+
+#### Priority Color Coding:
+- **Critical**: `var(--cds-support-01)` (red)
+- **High**: `var(--cds-support-03)` (orange)
+- **Medium**: `var(--cds-support-04)` (yellow)
+- **Low**: `var(--cds-support-02)` (green)
+
+#### CSS Implementation:
+```css
+/* IBM Carbon Design System Import */
+<link rel="stylesheet" href="https://unpkg.com/@carbon/styles/css/styles-g10.css">
+
+/* Custom Field Styling */
+.case-description-field, .ai-recommendations-field, .research-data-field {
+    background-color: #393939 !important;
+    color: #ffffff !important;
+    border: 1px solid #525252 !important;
+    border-radius: 0.25rem;
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+}
+```
+
+#### Design Principles:
+1. **High Contrast**: Dark backgrounds with light text for readability
+2. **Consistent Spacing**: 0.25rem border radius, 0.75rem padding
+3. **Clear Hierarchy**: Different grey levels for different content types
+4. **Professional Appearance**: Enterprise-grade IBM Carbon Design System
+5. **Accessibility**: WCAG AA compliant color combinations
+
 ## 🔧 Technical Implementation Decisions
 
 ### Mock Data Strategy:
@@ -253,6 +309,10 @@ tiger-ai-detective/
 - [x] Database session management fixes
 - [x] Git repository with clean commit history
 - [x] AI context directory with comprehensive documentation
+- [x] IBM Carbon Design System implementation (Gray 10 theme)
+- [x] CRUD functionality with proper field visibility and contrast
+- [x] Navigation fixes and session state management
+- [x] Professional UI with high contrast and accessibility compliance
 
 ### 🔄 In Progress:
 - [ ] RAG system implementation
