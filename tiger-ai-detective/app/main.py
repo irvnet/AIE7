@@ -31,8 +31,8 @@ from langchain_core.tools import tool
 from typing import Dict, Optional
 
 # Import our models
-from models.database import SessionLocal, engine
-from models.schemas import Base, Customer, Product, TigerTeamMember, SupportTicket, Case, Evidence
+from app.models.database import SessionLocal, engine
+from app.models.schemas import Base, Customer, Product, TigerTeamMember, SupportTicket, Case, Evidence
 
 # Set page config
 st.set_page_config(
@@ -218,34 +218,53 @@ def create_case_form():
             
             customer_id = st.selectbox(
                 "Customer",
-                options=customers,
-                format_func=lambda x: f"{x.company} - {x.name}"
+                options=[None] + customers,
+                format_func=lambda x: "Select a customer..." if x is None else f"{x.company} - {x.name}"
             )
             
             product_id = st.selectbox(
                 "IBM Product",
-                options=products,
-                format_func=lambda x: f"{x.name} {x.version}"
+                options=[None] + products,
+                format_func=lambda x: "Select a product..." if x is None else f"{x.name} {x.version}"
             )
             
-            priority = st.selectbox("Priority", ["Critical", "High", "Medium", "Low"])
+            priority = st.selectbox("Priority", ["Select priority...", "Critical", "High", "Medium", "Low"], index=0)
             
         with col2:
             assigned_member_id = st.selectbox(
                 "Assign to Tiger Team Member",
-                options=members,
-                format_func=lambda x: f"{x.name} ({x.expertise_areas[0] if x.expertise_areas else 'General'})"
+                options=[None] + members,
+                format_func=lambda x: "Select a team member..." if x is None else f"{x.name} ({x.expertise_areas[0] if x.expertise_areas else 'General'})"
             )
             
-            support_ticket = st.text_input("Support Ticket Number (PMR)")
-            desired_outcome = st.text_area("Desired Outcome")
+            support_ticket = st.text_input("Support Ticket Number (PMR)", placeholder="e.g., PMR123456")
+            desired_outcome = st.text_area("Desired Outcome", placeholder="Describe the desired resolution or outcome...")
         
-        title = st.text_input("Case Title")
-        description = st.text_area("Case Description", height=150)
+        title = st.text_input("Case Title", placeholder="Enter a descriptive title for this case...")
+        description = st.text_area("Case Description", height=150, placeholder="Provide a detailed description of the issue, including symptoms, error messages, and any relevant context...")
         
         submitted = st.form_submit_button("🚀 Create Case & Generate AI Research")
         
-        if submitted and title and description:
+        if submitted:
+            # Validate required fields
+            if not title or title.strip() == "":
+                st.error("Please enter a case title.")
+                return
+            if not description or description.strip() == "":
+                st.error("Please enter a case description.")
+                return
+            if customer_id is None:
+                st.error("Please select a customer.")
+                return
+            if product_id is None:
+                st.error("Please select an IBM product.")
+                return
+            if assigned_member_id is None:
+                st.error("Please select a team member.")
+                return
+            if priority == "Select priority...":
+                st.error("Please select a priority level.")
+                return
             try:
                 db = SessionLocal()
                 
@@ -258,9 +277,9 @@ def create_case_form():
                     customer_id=customer_id.id,
                     product_id=product_id.id,
                     assigned_member_id=assigned_member_id.id,
-                    title=title,
-                    description=description,
-                    desired_outcome=desired_outcome,
+                    title=title.strip(),
+                    description=description.strip(),
+                    desired_outcome=desired_outcome.strip() if desired_outcome else None,
                     priority=priority,
                     status="Open"
                 )
