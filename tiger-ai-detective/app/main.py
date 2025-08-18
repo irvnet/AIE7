@@ -312,38 +312,97 @@ def display_cases():
     
     db = SessionLocal()
     try:
-        cases = db.query(Case).filter(Case.status != "Resolved").order_by(Case.created_at.desc()).all()
+        # Get all cases (not just active ones) for better overview
+        cases = db.query(Case).order_by(Case.created_at.desc()).all()
         
         if not cases:
-            st.info("No active cases found.")
+            st.info("No cases found in the system.")
             return
         
-        for case in cases:
-            priority_class = case.priority.lower()
-            with st.expander(f"{case.case_number}: {case.title}"):
+        # Show summary statistics
+        total_cases = len(cases)
+        active_cases = len([c for c in cases if c.status != "Resolved"])
+        critical_cases = len([c for c in cases if c.priority == "Critical"])
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Total Cases", total_cases)
+        with col2:
+            st.metric("Active Cases", active_cases)
+        with col3:
+            st.metric("Critical Priority", critical_cases)
+        
+        st.markdown("---")
+        
+        # Filter options
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            status_filter = st.selectbox(
+                "Filter by Status",
+                ["All", "Open", "Research", "Customer Call", "Resolved"],
+                index=0
+            )
+        with col2:
+            priority_filter = st.selectbox(
+                "Filter by Priority",
+                ["All", "Critical", "High", "Medium", "Low"],
+                index=0
+            )
+        with col3:
+            show_resolved = st.checkbox("Show Resolved Cases", value=False)
+        
+        # Apply filters
+        filtered_cases = cases
+        if status_filter != "All":
+            filtered_cases = [c for c in filtered_cases if c.status == status_filter]
+        if priority_filter != "All":
+            filtered_cases = [c for c in filtered_cases if c.priority == priority_filter]
+        if not show_resolved:
+            filtered_cases = [c for c in filtered_cases if c.status != "Resolved"]
+        
+        st.markdown(f"**Showing {len(filtered_cases)} of {total_cases} cases**")
+        
+        # Display cases
+        for case in filtered_cases:
+            # Get customer and product info
+            customer = db.query(Customer).filter(Customer.id == case.customer_id).first()
+            product = db.query(Product).filter(Product.id == case.product_id).first()
+            assigned_member = db.query(TigerTeamMember).filter(TigerTeamMember.id == case.assigned_member_id).first()
+            
+            # Priority color coding
+            priority_colors = {
+                "Critical": "🔴",
+                "High": "🟠", 
+                "Medium": "🟡",
+                "Low": "🟢"
+            }
+            priority_icon = priority_colors.get(case.priority, "⚪")
+            
+            with st.expander(f"{priority_icon} {case.case_number}: {case.title}"):
                 col1, col2 = st.columns([2, 1])
                 
                 with col1:
                     st.markdown(f"**Status:** {case.status}")
                     st.markdown(f"**Priority:** {case.priority}")
+                    st.markdown(f"**Customer:** {customer.company if customer else 'Unknown'}")
+                    st.markdown(f"**Product:** {product.name if product else 'Unknown'} {product.version if product else ''}")
                     st.markdown(f"**Description:** {case.description}")
                     
                     if case.ai_recommendations:
                         st.markdown("**AI Recommendations:**")
-                        st.markdown(case.ai_recommendations)
+                        st.markdown(f'<div class="response-box">{case.ai_recommendations}</div>', unsafe_allow_html=True)
                 
                 with col2:
-                    st.markdown(f"**Created:** {case.created_at.strftime('%Y-%m-%d')}")
-                    # Get assigned member name safely
-                    assigned_member_name = "Unassigned"
-                    if case.assigned_member_id:
-                        member = db.query(TigerTeamMember).filter(TigerTeamMember.id == case.assigned_member_id).first()
-                        if member:
-                            assigned_member_name = member.name
-                    st.markdown(f"**Assigned:** {assigned_member_name}")
+                    st.markdown(f"**Created:** {case.created_at.strftime('%Y-%m-%d %H:%M')}")
+                    st.markdown(f"**Assigned:** {assigned_member.name if assigned_member else 'Unassigned'}")
+                    if case.support_ticket_id:
+                        st.markdown(f"**Support Ticket:** {case.support_ticket_id}")
+                    if case.desired_outcome:
+                        st.markdown(f"**Desired Outcome:** {case.desired_outcome}")
                     
                     if st.button(f"View Details", key=f"view_{case.id}"):
                         st.session_state.current_case = case
+                        st.rerun()
     finally:
         db.close()
 
@@ -420,28 +479,84 @@ def main():
             st.session_state.show_cases = False
             st.session_state.show_create = False
     
-    # Main content area
-    tab1, tab2, tab3, tab4 = st.tabs(["📋 Create Case", "📊 View Cases", "🔍 Research Assistant", "📜 History"])
+    # Initialize session state for navigation
+    if 'show_cases' not in st.session_state:
+        st.session_state.show_cases = False
+    if 'show_create' not in st.session_state:
+        st.session_state.show_create = False
+    if 'show_research' not in st.session_state:
+        st.session_state.show_research = False
     
-    with tab1:
-        create_case_form()
-    
-    with tab2:
+    # Main content area - use conditional rendering based on session state
+    if st.session_state.show_cases:
+        st.markdown("### 📊 View All Cases")
         display_cases()
+        if st.button("← Back to Main Menu"):
+            st.session_state.show_cases = False
+            st.session_state.show_create = False
+            st.session_state.show_research = False
+            st.rerun()
     
-    with tab3:
+    elif st.session_state.show_create:
+        create_case_form()
+        if st.button("← Back to Main Menu"):
+            st.session_state.show_cases = False
+            st.session_state.show_create = False
+            st.session_state.show_research = False
+            st.rerun()
+    
+    elif st.session_state.show_research:
         research_assistant()
+        if st.button("← Back to Main Menu"):
+            st.session_state.show_cases = False
+            st.session_state.show_create = False
+            st.session_state.show_research = False
+            st.rerun()
     
-    with tab4:
-        if st.session_state.chat_history:
-            st.markdown("### 📜 Research History")
-            for i, chat in enumerate(reversed(st.session_state.chat_history)):
-                with st.expander(f"Q: {chat['question'][:50]}..."):
-                    st.markdown(f"**Question:** {chat['question']}")
-                    st.markdown(f"**Answer:** {chat['answer']}")
-                    st.caption(f"Asked: {chat['timestamp']}")
-        else:
-            st.info("No research history yet.")
+    else:
+        # Default view - show main dashboard
+        st.markdown("### 🎯 Quick Actions")
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            if st.button("📊 View All Cases", type="primary", use_container_width=True):
+                st.session_state.show_cases = True
+                st.rerun()
+        
+        with col2:
+            if st.button("➕ Create New Case", type="primary", use_container_width=True):
+                st.session_state.show_create = True
+                st.rerun()
+        
+        with col3:
+            if st.button("🔍 Research Assistant", type="primary", use_container_width=True):
+                st.session_state.show_research = True
+                st.rerun()
+        
+        st.markdown("---")
+        
+        # Show tabs for detailed access
+        tab1, tab2, tab3, tab4 = st.tabs(["📋 Create Case", "📊 View Cases", "🔍 Research Assistant", "📜 History"])
+        
+        with tab1:
+            create_case_form()
+        
+        with tab2:
+            display_cases()
+        
+        with tab3:
+            research_assistant()
+        
+        with tab4:
+            if st.session_state.chat_history:
+                st.markdown("### 📜 Research History")
+                for i, chat in enumerate(reversed(st.session_state.chat_history)):
+                    with st.expander(f"Q: {chat['question'][:50]}..."):
+                        st.markdown(f"**Question:** {chat['question']}")
+                        st.markdown(f"**Answer:** {chat['answer']}")
+                        st.caption(f"Asked: {chat['timestamp']}")
+            else:
+                st.info("No research history yet.")
 
 if __name__ == "__main__":
     main()

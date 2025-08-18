@@ -298,7 +298,7 @@ uv sync                    # Install dependencies
 uv run python setup.py     # Setup project
 
 # Development
-uv run streamlit run app/main.py  # Run app
+uv run python -m streamlit run app/main.py --server.port 8501 --server.address localhost  # Run app
 uv run python scripts/generate_mock_data.py  # Generate mock data
 uv run python scripts/download_documentation.py  # Download docs
 

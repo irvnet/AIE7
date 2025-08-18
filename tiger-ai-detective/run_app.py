@@ -33,7 +33,7 @@ def main():
     # Run the Streamlit app using uv
     try:
         subprocess.run([
-            "uv", "run", "streamlit", "run", "app/main.py",
+            "uv", "run", "python", "-m", "streamlit", "run", "app/main.py",
             "--server.port", "8501",
             "--server.address", "localhost"
         ], check=True)
