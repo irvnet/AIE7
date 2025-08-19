@@ -806,7 +806,7 @@ def display_cases():
         st.markdown("---")
         
         # Filter options
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
         with col1:
             status_filter = st.selectbox(
                 "Filter by Status",
@@ -821,8 +821,6 @@ def display_cases():
                 index=0,
                 key="filter_priority"
             )
-        with col3:
-            show_resolved = st.checkbox("Show Resolved Cases", value=False, key="filter_resolved")
         
         # Apply filters
         filtered_cases = cases
@@ -830,8 +828,6 @@ def display_cases():
             filtered_cases = [c for c in filtered_cases if c.status == status_filter]
         if priority_filter != "All":
             filtered_cases = [c for c in filtered_cases if c.priority == priority_filter]
-        if not show_resolved:
-            filtered_cases = [c for c in filtered_cases if c.status != "Resolved"]
         
         st.markdown(f"**Showing {len(filtered_cases)} of {total_cases} cases**")
         
