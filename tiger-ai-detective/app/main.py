@@ -918,6 +918,28 @@ def research_assistant():
             st.session_state.research_question = "What architectural patterns should I use to design a scalable system integrating IBM products for handling high transaction volumes?"
             st.rerun()
     
+    # Advanced test scenarios
+    st.markdown("#### 🔬 Advanced Test Scenarios")
+    col3, col4 = st.columns(2)
+    
+    with col3:
+        if st.button("🏦 Financial Services HA", key="financial_ha", help="High-availability for financial services"):
+            st.session_state.research_question = "How should I design a high-availability IBM MQ messaging architecture for a financial services application with strict compliance requirements?"
+            st.rerun()
+        
+        if st.button("🔄 Disaster Recovery", key="disaster_recovery", help="DR strategies for IBM systems"):
+            st.session_state.research_question = "What's the recommended disaster recovery strategy for IBM MQ and Db2 systems in a 24/7 environment?"
+            st.rerun()
+    
+    with col4:
+        if st.button("🐳 Container Orchestration", key="container_orch", help="Containerizing IBM applications"):
+            st.session_state.research_question = "How should I containerize IBM applications and deploy them on OpenShift with proper scaling and monitoring?"
+            st.rerun()
+        
+        if st.button("🏥 Healthcare Compliance", key="healthcare_comp", help="Healthcare regulatory compliance"):
+            st.session_state.research_question = "What security patterns and compliance measures should I implement for IBM products in a regulated healthcare environment?"
+            st.rerun()
+    
     st.markdown("---")
     
     # Custom question input
