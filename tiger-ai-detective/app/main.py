@@ -779,7 +779,7 @@ def display_case_details(case):
 def display_cases():
     """Display existing cases"""
     logger.info("Starting display_cases function")
-    st.markdown("### 📊 Active Tiger Team Cases")
+    st.markdown("### 📊 View All Cases")
     
     db = SessionLocal()
     try:
@@ -926,7 +926,7 @@ def research_assistant():
 # Main app interface
 def main():
     logger.info("Starting main function")
-    st.markdown('<h1 class="main-header">🦁 IBM Tiger Team Support</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">🐯 IBM Tiger Team Support</h1>', unsafe_allow_html=True)
     st.markdown('<p class="sub-header">AI-powered case management for critical IBM support issues</p>', unsafe_allow_html=True)
     
     # Sidebar for navigation
