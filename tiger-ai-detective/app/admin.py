@@ -218,7 +218,7 @@ def initialize_rag_system(admin: AdminManager):
     """Initialize the RAG system and database"""
     try:
         # Create database tables
-        from app.database import Base, engine
+        from app.models.database import Base, engine
         Base.metadata.create_all(bind=engine)
         
         # Get API keys from admin manager
