@@ -24,8 +24,9 @@
 - **LangChain** - LLM application framework
 - **LangGraph** - Stateful, multi-actor applications
 - **OpenAI GPT-4o-mini** - LLM for agents and RAG
-- **OpenAI Embeddings (text-embedding-3-small)** - Vector embeddings
+- **OpenAI Embeddings (text-embedding-3-large)** - Vector embeddings
 - **Qdrant** - Vector database (in-memory for MVP)
+- **Tavily Search** - Web search for current best practices
 
 ### Package Management:
 - **uv** - Fast Python package manager
@@ -47,12 +48,15 @@ uv sync                    # Install dependencies
 uv run python setup.py     # Setup project
 
 # Development
-uv run streamlit run app/main.py  # Run app
+uv run python -m streamlit run app/main.py --server.port 8501 --server.address localhost  # Run app
 uv run python scripts/generate_mock_data.py  # Generate mock data
 uv run python scripts/download_documentation.py  # Download docs
 
 # Testing
 uv run python -m pytest tests/  # Run tests
+uv run python scripts/test_architecture_agent.py  # Quick Architecture Agent test
+uv run python tests/test_architecture_agent.py --quick  # Quick test only
+uv run python tests/test_architecture_agent.py  # Full test suite
 uv run python test_system.py    # System health check
 ```
 
@@ -80,18 +84,29 @@ DATABASE_URL=sqlite:///./tiger_team_support.db  # Development
 5. IBM App Connect Enterprise
 6. IBM API Connect
 
+### Current Status:
+1. ✅ **RAG System Implemented** - Tiger Team case-specific recommendations
+2. ✅ **Architecture Agent** - Specialized IBM architecture guidance
+3. ✅ **Admin Page** - Centralized configuration and system status
+4. ✅ **Comprehensive Testing** - 8 architecture scenarios validated
+
 ### Next Steps:
-1. Process downloaded PDFs for RAG
-2. Implement vector database with Qdrant
-3. Update main.py with RAG system
-4. Test with integration scenarios
+1. **Ingest sources.catalog.json** - Expand knowledge base with catalog data
+2. **Advanced Retrieval** - Implement ensemble retrievers and contextual compression
+3. **Multi-Agent System** - Create specialized agents for different IBM domains
+4. **Production Deployment** - Persistent storage and performance optimization
 
 ## 📁 Key Files
 
 - **`app/main.py`** - Streamlit frontend
+- **`app/rag_system.py`** - Tiger Team RAG system
+- **`app/architecture_agent.py`** - Specialized architecture guidance
+- **`app/admin.py`** - Admin configuration page
 - **`app/models/`** - Database models and schemas
-- **`data/documentation/`** - IBM PDFs (9 files, 85MB)
+- **`data/documentation/`** - IBM PDFs (9 files, 85MB, 3804 pages)
+- **`data/sources.catalog.json`** - IBM documentation sources (27 sources)
 - **`scripts/`** - Automation scripts
+- **`tests/test_architecture_agent.py`** - Comprehensive Architecture Agent tests
 - **`PROJECT_CONTEXT.md`** - Detailed project state
 
 ## 🚨 Common Issues

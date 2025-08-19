@@ -195,11 +195,11 @@
 
 ## 🔄 RAG System Design (Based on 11_challenge)
 
-### Pattern from 11_challenge:
+### **Tiger Team RAG System** (`app/rag_system.py`):
 ```python
 # Document Loading & Processing
-directory_loader = DirectoryLoader("data", glob="**/*.pdf", loader_cls=PyMuPDFLoader)
-documents = directory_loader.load()
+directory_loader = DirectoryLoader("data/documentation", glob="**/*.pdf", loader_cls=PyMuPDFLoader)
+documents = directory_loader.load()  # 3804 pages from 9 PDFs
 
 # Chunk documents with token-aware splitting
 text_splitter = RecursiveCharacterTextSplitter(
@@ -207,10 +207,10 @@ text_splitter = RecursiveCharacterTextSplitter(
     chunk_overlap=0,
     length_function=tiktoken_len,
 )
-chunks = text_splitter.split_documents(documents)
+chunks = text_splitter.split_documents(documents)  # 4125 chunks
 
 # Vector Database Creation
-embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
+embedding_model = OpenAIEmbeddings(model="text-embedding-3-large")
 qdrant_vectorstore = Qdrant.from_documents(
     documents=chunks,
     embedding=embedding_model,
@@ -219,31 +219,45 @@ qdrant_vectorstore = Qdrant.from_documents(
 retriever = qdrant_vectorstore.as_retriever()
 
 # LangGraph State Management
-class State(TypedDict):
+class RAGState(TypedDict):
     question: str
     context: List
     response: str
 
-def retrieve(state: State) -> State:
+def retrieve(state: RAGState) -> RAGState:
     retrieved_docs = retriever.invoke(state["question"])
     return {"context": retrieved_docs}
 
-def generate(state: State) -> State:
+def generate(state: RAGState) -> RAGState:
     generator_chain = chat_prompt | openai_chat_model | StrOutputParser()
     response = generator_chain.invoke({"query": state["question"], "context": state["context"]})
     return {"response": response}
 
 # Build graph
-graph_builder = StateGraph(State)
+graph_builder = StateGraph(RAGState)
 graph_builder = graph_builder.add_sequence([retrieve, generate])
 rag_graph = graph_builder.compile()
 ```
 
-### Tiger Team Adaptations:
-- **Multiple knowledge sources**: IBM docs + support cases + product knowledge
-- **Cross-product relationships**: WebSphere + MQ + API Connect scenarios
-- **Integration scenarios**: Real-world deployment issues
-- **Tiger Team expertise**: Specialized troubleshooting knowledge
+### **Architecture Agent** (`app/architecture_agent.py`):
+```python
+# Specialized agent for IBM architecture guidance
+class ArchitectureAgent:
+    def __init__(self, openai_api_key, tavily_api_key=None):
+        self.llm = ChatOpenAI(model="gpt-4o-mini")
+        self.tavily_tool = TavilySearchResults()  # Web search
+        self.catalog_sources = []  # From sources.catalog.json
+    
+    def get_architecture_guidance(self, question, pattern_tags=None):
+        # 1. Get relevant sources from catalog
+        # 2. Perform targeted web searches
+        # 3. Generate structured architecture guidance
+```
+
+### **Dual System Architecture**:
+- **Tiger Team RAG**: Case-specific recommendations using local IBM documentation
+- **Architecture Agent**: General architecture guidance using web search + catalog
+- **Admin Page**: Centralized configuration and system status monitoring
 
 ## 🐛 Issues Resolved
 
@@ -272,21 +286,28 @@ tiger-ai-detective/
 ├── app/
 │   ├── __init__.py
 │   ├── main.py                 # Streamlit frontend
+│   ├── rag_system.py           # Tiger Team RAG system
+│   ├── architecture_agent.py   # Specialized architecture guidance
+│   ├── admin.py                # Admin configuration page
 │   └── models/
 │       ├── __init__.py
 │       ├── database.py         # SQLAlchemy setup
 │       └── schemas.py          # ORM models and Pydantic schemas
 ├── data/
-│   ├── sources.catalog.json    # IBM documentation sources
-│   └── documentation/          # Downloaded PDFs (9 files, 85MB)
+│   ├── sources.catalog.json    # IBM documentation sources (27 sources)
+│   └── documentation/          # Downloaded PDFs (9 files, 85MB, 3804 pages)
 ├── scripts/
 │   ├── download_documentation.py  # PDF download automation
-│   └── generate_mock_data.py      # Mock data generation
+│   ├── generate_mock_data.py      # Mock data generation
+│   └── test_architecture_agent.py # Quick Architecture Agent tests
 ├── tests/
-│   └── test_basic.py          # Basic unit tests
+│   ├── test_basic.py              # Basic unit tests
+│   └── test_architecture_agent.py # Comprehensive Architecture Agent tests
+├── config/
+│   ├── admin_config.json          # API keys and configuration
+│   └── admin_config.template.json # Template for configuration
 ├── .ai-context/               # AI-specific context files
 ├── pyproject.toml             # Project configuration (uv)
-├── requirements.txt           # Dependencies
 ├── run_app.py                # Application launcher
 ├── setup.py                  # Project setup automation
 ├── Makefile                  # Development commands
@@ -314,19 +335,29 @@ tiger-ai-detective/
 - [x] Navigation fixes and session state management
 - [x] Professional UI with high contrast and accessibility compliance
 
-### 🔄 In Progress:
-- [ ] RAG system implementation
-- [ ] PDF processing and chunking
-- [ ] Vector database creation
-- [ ] Integration with existing app
+### ✅ Recently Completed:
+- [x] **RAG System Implementation** - Based on 11_challenge patterns
+- [x] **PDF Processing & Chunking** - 3804 pages → 4125 chunks from 9 PDFs (85MB)
+- [x] **Vector Database Creation** - Qdrant in-memory with OpenAI embeddings
+- [x] **Tiger Team RAG System** - Case-specific AI recommendations
+- [x] **Architecture Agent** - Specialized IBM architecture guidance
+- [x] **Admin Page** - Centralized configuration and system status
+- [x] **Comprehensive Testing** - 8 architecture scenarios + quick tests
+- [x] **Web Search Integration** - Tavily for current best practices
+- [x] **Progress Meter** - Real-time system initialization feedback
+
+### 🔄 Current Focus:
+- [ ] **Enhanced RAG Retrieval** - Advanced retrieval techniques
+- [ ] **Multi-Agent Architecture** - Specialized agents for different domains
+- [ ] **Persistent Vector Storage** - Production-ready vector database
+- [ ] **Performance Optimization** - Response time and accuracy improvements
 
 ### 📋 Next Steps:
-1. **Process PDFs** for text extraction and chunking
-2. **Create vector embeddings** using OpenAI
-3. **Build Qdrant vector database** 
-4. **Update main.py** with RAG system using 11_challenge pattern
-5. **Test with integration scenarios**
-6. **Deploy to Vercel**
+1. **Ingest sources.catalog.json** - Expand knowledge base with catalog data
+2. **Advanced Retrieval** - Implement ensemble retrievers and contextual compression
+3. **Multi-Agent System** - Create specialized agents for different IBM domains
+4. **Production Deployment** - Persistent storage and performance optimization
+5. **User Experience** - Enhanced UI and workflow improvements
 
 ## 🎯 Key Success Metrics
 
@@ -364,6 +395,9 @@ uv run python scripts/download_documentation.py  # Download docs
 
 # Testing
 uv run python -m pytest tests/  # Run tests
+uv run python scripts/test_architecture_agent.py  # Quick Architecture Agent test
+uv run python tests/test_architecture_agent.py --quick  # Quick test only
+uv run python tests/test_architecture_agent.py  # Full test suite
 uv run python test_system.py    # System health check
 
 # Code Quality
@@ -374,6 +408,6 @@ make typecheck               # Type checking
 
 ---
 
-**Last Updated**: August 18, 2024  
-**Current Commit**: `9ec8e22` - "feat: Add IBM documentation download system and integration-focused mock data"  
-**Status**: Ready for RAG implementation
+**Last Updated**: August 19, 2024  
+**Current Commit**: `dc6d80b` - "feat: Add comprehensive testing framework for Architecture Agent"  
+**Status**: Architecture Agent implemented and tested - ready for production enhancements
