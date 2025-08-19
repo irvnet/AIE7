@@ -159,24 +159,91 @@ def admin_page():
     else:
         st.warning("⚠️ Database not found")
     
-    # Actions Section
+    # System Initialization Section
+    st.markdown("---")
+    st.markdown("#### 🚀 System Initialization")
+    
+    # Check if system is already initialized
+    if st.session_state.get("system_initialized", False):
+        st.success("✅ System is initialized and ready")
+    else:
+        st.warning("⚠️ System needs initialization")
+    
+    # Initialize button
+    if st.button("🚀 Initialize System", type="primary", help="Initialize the RAG system and database"):
+        openai_key = admin.get_api_key("openai_api_key")
+        tavily_key = admin.get_api_key("tavily_api_key")
+        
+        if not openai_key:
+            st.error("❌ Please configure OpenAI API key first")
+        elif not tavily_key:
+            st.warning("⚠️ Tavily API key recommended for web search capabilities")
+            with st.spinner("Initializing system with local docs only..."):
+                try:
+                    success = initialize_rag_system(admin)
+                    if success:
+                        st.success("✅ System initialized successfully!")
+                        st.rerun()
+                    else:
+                        st.error("❌ Failed to initialize system")
+                except Exception as e:
+                    st.error(f"❌ Error initializing system: {str(e)}")
+        else:
+            with st.spinner("Initializing system with full capabilities..."):
+                try:
+                    success = initialize_rag_system(admin)
+                    if success:
+                        st.success("✅ System initialized successfully!")
+                        st.rerun()
+                    else:
+                        st.error("❌ Failed to initialize system")
+                except Exception as e:
+                    st.error(f"❌ Error initializing system: {str(e)}")
+    
+    # Quick Actions
     st.markdown("---")
     st.markdown("#### ⚡ Quick Actions")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        if st.button("🔄 Test API Keys", type="primary"):
+        if st.button("🧪 Test API Keys", help="Test if API keys are working"):
             test_api_keys(admin)
     
     with col2:
-        if st.button("🚀 Initialize RAG System", type="primary"):
-            if admin.get_api_key("openai_api_key"):
-                with st.spinner("Initializing RAG system..."):
-                    from app.main import initialize_system
-                    initialize_system()
-            else:
-                st.error("OpenAI API key required for RAG system initialization")
+        if st.button("🔄 Refresh Status", help="Refresh system status"):
+            st.rerun()
+
+def initialize_rag_system(admin: AdminManager):
+    """Initialize the RAG system and database"""
+    try:
+        # Create database tables
+        from app.database import Base, engine
+        Base.metadata.create_all(bind=engine)
+        
+        # Get API keys from admin manager
+        openai_api_key = admin.get_api_key("openai_api_key")
+        if not openai_api_key:
+            st.error("Please configure your OpenAI API key first.")
+            return False
+        
+        # Initialize the Tiger Team RAG system
+        from app.rag_system import TigerTeamRAGSystem
+        rag_system = TigerTeamRAGSystem()
+        result = rag_system.initialize(openai_api_key)
+        
+        if result["success"]:
+            # Store in session state
+            st.session_state.rag_system = rag_system
+            st.session_state.system_initialized = True
+            return True
+        else:
+            st.error(f"Failed to initialize RAG system: {result['message']}")
+            return False
+            
+    except Exception as e:
+        st.error(f"Error initializing system: {str(e)}")
+        return False
 
 def test_api_keys(admin: AdminManager):
     """Test API keys functionality"""

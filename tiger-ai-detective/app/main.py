@@ -933,40 +933,8 @@ def main():
     st.markdown('<h1 class="main-header">🦁 IBM Tiger Team Support</h1>', unsafe_allow_html=True)
     st.markdown('<p class="sub-header">AI-powered case management for critical IBM support issues</p>', unsafe_allow_html=True)
     
-    # Sidebar for configuration
+    # Sidebar for navigation
     with st.sidebar:
-        st.header("🔧 Configuration")
-        
-        # API Keys (read-only display from admin)
-        admin = AdminManager()
-        openai_key = admin.get_api_key("openai_api_key")
-        tavily_key = admin.get_api_key("tavily_api_key")
-        
-        if openai_key:
-            st.success("✅ OpenAI API key configured")
-        else:
-            st.warning("⚠️ OpenAI API key not configured")
-            
-        if tavily_key:
-            st.success("✅ Tavily API key configured")
-        else:
-            st.warning("⚠️ Tavily API key not configured")
-        
-        st.info("💡 Configure API keys in the Admin page")
-        
-        # Initialize button
-        if st.button("🚀 Initialize System", type="primary"):
-            if not openai_key:
-                st.error("Please configure OpenAI API key in the Admin page")
-            elif not tavily_key:
-                st.warning("Tavily API key recommended for web search capabilities")
-                with st.spinner("Initializing system with local docs only..."):
-                    initialize_system()
-            else:
-                with st.spinner("Initializing system with full capabilities..."):
-                    initialize_system()
-        
-        st.markdown("---")
         st.markdown("### 📋 Quick Actions")
         
         if st.button("📊 View All Cases"):
