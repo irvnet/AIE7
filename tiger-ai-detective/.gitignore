@@ -191,6 +191,7 @@ $RECYCLE.BIN/
 # Project specific
 example-code/
 *.db
+temp_aie7/
 
 # Configuration files with sensitive data
 config/admin_config.json
