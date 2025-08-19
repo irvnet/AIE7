@@ -191,3 +191,6 @@ $RECYCLE.BIN/
 # Project specific
 example-code/
 *.db
+
+# Configuration files with sensitive data
+config/admin_config.json

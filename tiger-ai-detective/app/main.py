@@ -35,6 +35,12 @@ from typing import Dict, Optional
 from app.models.database import SessionLocal, engine
 from app.models.schemas import Base, Customer, Product, TigerTeamMember, SupportTicket, Case, Evidence
 
+# Import RAG system
+from app.rag_system import TigerTeamRAGSystem
+
+# Import admin module
+from app.admin import AdminManager
+
 # Set page config
 st.set_page_config(
     page_title="IBM Tiger Team Support",
@@ -277,79 +283,30 @@ def initialize_system():
         # Create database tables
         Base.metadata.create_all(bind=engine)
         
-        # Initialize OpenAI components
-        openai_chat_model = ChatOpenAI(model="gpt-4o-mini")
-        embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
+        # Get API keys from admin manager
+        admin = AdminManager()
+        openai_api_key = admin.get_api_key("openai_api_key")
+        if not openai_api_key:
+            st.error("Please configure your OpenAI API key in the Admin page.")
+            return False
         
-        # Create a simple RAG system for IBM documentation
-        # In a real system, this would load actual IBM documentation
-        ibm_docs = [
-            "IBM WebSphere Application Server is an enterprise Java application server for building, deploying, and managing applications.",
-            "Common WebSphere issues include memory leaks, performance degradation, and cluster communication failures.",
-            "IBM Db2 Database is an enterprise database management system with advanced analytics capabilities.",
-            "Db2 performance issues often relate to connection pooling, query optimization, and storage management.",
-            "IBM MQ provides enterprise messaging middleware for reliable application integration.",
-            "MQ issues typically involve message delivery, queue management, and security configuration.",
-            "Tiger Team best practices include thorough research, evidence collection, and systematic problem-solving approaches."
-        ]
+        # Initialize the Tiger Team RAG system
+        rag_system = TigerTeamRAGSystem()
+        result = rag_system.initialize(openai_api_key)
         
-        # Create vector store
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=750,
-            chunk_overlap=0,
-            length_function=lambda text: len(tiktoken.encoding_for_model("gpt-4o").encode(text))
-        )
-        
-        from langchain_core.documents import Document
-        documents = [Document(page_content=doc) for doc in ibm_docs]
-        chunks = text_splitter.split_documents(documents)
-        
-        qdrant_vectorstore = Qdrant.from_documents(
-            documents=chunks,
-            embedding=embedding_model,
-            location=":memory:"
-        )
-        qdrant_retriever = qdrant_vectorstore.as_retriever()
-        
-        # Create RAG chain
-        HUMAN_TEMPLATE = """
-        #CONTEXT:
-        {context}
-
-        QUERY:
-        {query}
-
-        You are an expert IBM Tiger Team specialist. Use the provided context to answer the query about IBM products and support issues. 
-        Provide practical, actionable advice based on the context. If you don't know the answer, say "I don't have enough information to answer this question."
-        """
-        chat_prompt = ChatPromptTemplate.from_messages([("human", HUMAN_TEMPLATE)])
-        
-        class State(TypedDict):
-            question: str
-            context: List
-            response: str
-
-        def retrieve(state: State) -> State:
-            retrieved_docs = qdrant_retriever.invoke(state["question"])
-            return {"context": retrieved_docs}
-
-        def generate(state: State) -> State:
-            generator_chain = chat_prompt | openai_chat_model | StrOutputParser()
-            response = generator_chain.invoke({"query": state["question"], "context": state["context"]})
-            return {"response": response}
-
-        graph_builder = StateGraph(State)
-        graph_builder = graph_builder.add_sequence([retrieve, generate])
-        graph_builder.add_edge(START, "retrieve")
-        rag_graph = graph_builder.compile()
-        
-        # Store in session state
-        st.session_state.rag_graph = rag_graph
-        st.session_state.openai_chat_model = openai_chat_model
-        st.session_state.system_initialized = True
-        
-        st.success("System initialized successfully!")
-        return True
+        if result["success"]:
+            # Store in session state
+            st.session_state.rag_system = rag_system
+            st.session_state.system_initialized = True
+            
+            # Get system status for feedback
+            status = rag_system.get_system_status()
+            st.success(f"✅ {result['message']}")
+            st.info(f"📊 System Status: {status['has_vectorstore']} vectorstore, {status['has_llm']} LLM, {status['has_embeddings']} embeddings")
+            return True
+        else:
+            st.error(f"Failed to initialize RAG system: {result['error']}")
+            return False
         
     except Exception as e:
         st.error(f"Error initializing system: {str(e)}")
@@ -363,51 +320,21 @@ def get_db():
     finally:
         db.close()
 
-def get_ai_recommendations(case_description: str, product_name: str) -> str:
-    """Get AI recommendations for a case"""
+def get_ai_recommendations(case_description: str, product_name: str, priority: str = "Medium") -> str:
+    """Get AI recommendations for a case using the RAG system"""
     try:
         if not st.session_state.system_initialized:
             return "System not initialized. Please check your API keys and try again."
         
-        # Create a comprehensive prompt for AI recommendations
-        prompt = f"""
-        As an IBM Tiger Team specialist, analyze this support case and provide detailed recommendations:
-
-        **Case Description:** {case_description}
-        **IBM Product:** {product_name}
-
-        Please provide recommendations in the following format:
-
-        ## 🔍 **Initial Assessment**
-        - Key symptoms and potential root causes
-        - Critical areas requiring immediate attention
-        - Risk assessment and business impact
-
-        ## 📚 **Research Priorities**
-        - Specific IBM documentation to review
-        - Known issues and solutions to investigate
-        - Configuration areas to examine
-
-        ## 🛠️ **Troubleshooting Steps**
-        - Step-by-step diagnostic procedures
-        - Log files and error messages to check
-        - Configuration validation steps
-
-        ## 💡 **Potential Solutions**
-        - Specific fixes and workarounds
-        - Best practices to implement
-        - Preventive measures for future
-
-        ## 📋 **Next Actions**
-        - Immediate next steps for the Tiger Team
-        - Customer communication points
-        - Escalation criteria if needed
-
-        Base your recommendations on IBM best practices and documentation for {product_name}.
-        """
-        
-        result = st.session_state.rag_graph.invoke({"question": prompt})
-        return result.get("response", "No recommendations generated.")
+        # Use the RAG system to get recommendations
+        if hasattr(st.session_state, 'rag_system') and st.session_state.rag_system.is_initialized:
+            return st.session_state.rag_system.get_recommendations(
+                case_description=case_description,
+                product_name=product_name,
+                priority=priority
+            )
+        else:
+            return "RAG system not available. Please initialize the system first."
         
     except Exception as e:
         return f"Error generating recommendations: {str(e)}"
@@ -506,9 +433,9 @@ def create_case_form():
                 
                 # Generate AI recommendations
                 with st.spinner("🤖 Generating AI research recommendations..."):
-                    recommendations = get_ai_recommendations(description, product_id.name)
-                    new_case.ai_recommendations = recommendations
-                    db.commit()
+                    recommendations = get_ai_recommendations(description, product_id.name, priority)
+                new_case.ai_recommendations = recommendations
+                db.commit()
                 
                 st.success(f"✅ Case {case_number} created successfully!")
                 st.session_state.current_case = new_case
@@ -656,11 +583,10 @@ def edit_case_form(case):
                     # Generate new AI recommendations
                     with st.spinner("Generating new AI recommendations..."):
                         product_name = product_id.name if product_id else "General"
-                        recommendations = get_ai_recommendations(description.strip(), product_name)
+                        recommendations = get_ai_recommendations(description.strip(), product_name, priority)
                         case.ai_recommendations = recommendations
                     
                     db.commit()
-                    db.refresh(case)  # Refresh the case object with updated data
                     st.success("✅ Case updated with new AI recommendations!")
                     st.session_state.editing_case = None
                     st.rerun()
@@ -793,10 +719,17 @@ def display_case_details(case):
             """)
             if st.button("🔄 Generate AI Recommendations", key="generate_ai", help="Generate comprehensive AI research recommendations"):
                 with st.spinner("🤖 Analyzing case and generating AI recommendations..."):
-                    recommendations = get_ai_recommendations(case.description, product.name if product else "General")
-                    case.ai_recommendations = recommendations
-                    db.commit()
-                    st.rerun()
+                    # Get fresh case object in current session
+                    fresh_case = db.query(Case).filter(Case.id == case.id).first()
+                    if fresh_case:
+                        recommendations = get_ai_recommendations(fresh_case.description, product.name if product else "General", fresh_case.priority)
+                        fresh_case.ai_recommendations = recommendations
+                        fresh_case.updated_at = datetime.now()
+                        db.commit()
+                        st.success("✅ AI recommendations generated successfully!")
+                        st.rerun()
+                    else:
+                        st.error("❌ Case not found in database")
         
         # Action buttons
         st.markdown("---")
@@ -823,11 +756,17 @@ def display_case_details(case):
         with col4:
             if st.button("🔄 Generate AI Recommendations", key="regenerate_ai", help="Generate comprehensive AI research recommendations based on IBM documentation and best practices"):
                 with st.spinner("🤖 Analyzing case and generating AI recommendations..."):
-                    recommendations = get_ai_recommendations(case.description, product.name if product else "General")
-                    case.ai_recommendations = recommendations
-                    db.commit()
-                    st.success("✅ AI recommendations generated successfully!")
-                    st.rerun()
+                    # Get fresh case object in current session
+                    fresh_case = db.query(Case).filter(Case.id == case.id).first()
+                    if fresh_case:
+                        recommendations = get_ai_recommendations(fresh_case.description, product.name if product else "General", fresh_case.priority)
+                        fresh_case.ai_recommendations = recommendations
+                        fresh_case.updated_at = datetime.now()
+                        db.commit()
+                        st.success("✅ AI recommendations generated successfully!")
+                        st.rerun()
+                    else:
+                        st.error("❌ Case not found in database")
     
     except Exception as e:
         st.error(f"Error displaying case details: {str(e)}")
@@ -941,12 +880,20 @@ def display_cases():
         db.close()
 
 def research_assistant():
-    """AI Research Assistant"""
+    """AI Research Assistant using RAG system"""
     st.markdown("### 🔍 AI Research Assistant")
     
     if not st.session_state.system_initialized:
         st.warning("Please initialize the system first.")
         return
+    
+    # Add RAG system status display
+    if hasattr(st.session_state, 'rag_system'):
+        status = st.session_state.rag_system.get_system_status()
+        if status['initialized']:
+            st.success("✅ RAG system ready - IBM documentation loaded")
+        else:
+            st.warning("⚠️ RAG system not fully initialized")
     
     user_question = st.text_area(
         "Ask about IBM products, support issues, or research strategies:",
@@ -957,8 +904,15 @@ def research_assistant():
     
     if st.button("🔍 Get AI Research", type="primary", key="research_button"):
         if user_question.strip():
-            with st.spinner("Researching..."):
-                response = get_ai_recommendations(user_question, "General")
+            with st.spinner("🤖 Researching IBM documentation..."):
+                if hasattr(st.session_state, 'rag_system') and st.session_state.rag_system.is_initialized:
+                    response = st.session_state.rag_system.get_recommendations(
+                        case_description=user_question,
+                        product_name="General",
+                        priority="Medium"
+                    )
+                else:
+                    response = "RAG system not available. Please initialize the system first."
                 
                 # Add to chat history
                 st.session_state.chat_history.append({
@@ -983,18 +937,33 @@ def main():
     with st.sidebar:
         st.header("🔧 Configuration")
         
-        # API Keys
-        openai_key = st.text_input("OpenAI API Key", type="password", help="Enter your OpenAI API key", key="openai_key")
+        # API Keys (read-only display from admin)
+        admin = AdminManager()
+        openai_key = admin.get_api_key("openai_api_key")
+        tavily_key = admin.get_api_key("tavily_api_key")
         
         if openai_key:
-            os.environ["OPENAI_API_KEY"] = openai_key
+            st.success("✅ OpenAI API key configured")
+        else:
+            st.warning("⚠️ OpenAI API key not configured")
+            
+        if tavily_key:
+            st.success("✅ Tavily API key configured")
+        else:
+            st.warning("⚠️ Tavily API key not configured")
+        
+        st.info("💡 Configure API keys in the Admin page")
         
         # Initialize button
         if st.button("🚀 Initialize System", type="primary"):
             if not openai_key:
-                st.error("Please enter OpenAI API key")
+                st.error("Please configure OpenAI API key in the Admin page")
+            elif not tavily_key:
+                st.warning("Tavily API key recommended for web search capabilities")
+                with st.spinner("Initializing system with local docs only..."):
+                    initialize_system()
             else:
-                with st.spinner("Initializing system..."):
+                with st.spinner("Initializing system with full capabilities..."):
                     initialize_system()
         
         st.markdown("---")
@@ -1017,6 +986,13 @@ def main():
             st.session_state.show_cases = False
             st.session_state.show_create = False
             st.session_state.current_case = None  # Clear current case to exit details view
+        
+        if st.button("🔧 Admin"):
+            st.session_state.show_admin = True
+            st.session_state.show_cases = False
+            st.session_state.show_create = False
+            st.session_state.show_research = False
+            st.session_state.current_case = None
     
     # Initialize session state for navigation
     if 'show_cases' not in st.session_state:
@@ -1025,6 +1001,8 @@ def main():
         st.session_state.show_create = False
     if 'show_research' not in st.session_state:
         st.session_state.show_research = False
+    if 'show_admin' not in st.session_state:
+        st.session_state.show_admin = False
     if 'editing_case' not in st.session_state:
         st.session_state.editing_case = None
     
@@ -1074,6 +1052,16 @@ def main():
             st.session_state.show_research = False
             st.rerun()
     
+    elif st.session_state.show_admin:
+        from app.admin import admin_page
+        admin_page()
+        if st.button("← Back to Main Menu", key="back_to_main_from_admin"):
+            st.session_state.show_cases = False
+            st.session_state.show_create = False
+            st.session_state.show_research = False
+            st.session_state.show_admin = False
+            st.rerun()
+    
     else:
         # Default view - show main dashboard
         st.markdown("### 🎯 Quick Actions")
@@ -1097,7 +1085,7 @@ def main():
         st.markdown("---")
         
         # Show tabs for detailed access
-        tab1, tab2, tab3, tab4 = st.tabs(["📋 Create Case", "📊 View Cases", "🔍 Research Assistant", "📜 History"])
+        tab1, tab2, tab3, tab4, tab5 = st.tabs(["📋 Create Case", "📊 View Cases", "🔍 Research Assistant", "📜 History", "🔧 Admin"])
         
         with tab1:
             create_case_form()
@@ -1118,6 +1106,10 @@ def main():
                         st.caption(f"Asked: {chat['timestamp']}")
             else:
                 st.info("No research history yet.")
+        
+        with tab5:
+            from app.admin import admin_page
+            admin_page()
 
 if __name__ == "__main__":
     main()

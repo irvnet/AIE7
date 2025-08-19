@@ -92,8 +92,27 @@ This system helps Tiger Team members:
    uv run python run_app.py
    ```
 
-5. **Open your browser**
+5. **Configure API Keys**
+   - Copy `config/admin_config.template.json` to `config/admin_config.json`
+   - Add your OpenAI and Tavily API keys
+   - Or use the Admin page in the application to configure keys
+
+6. **Open your browser**
    Navigate to `http://localhost:8501`
+
+### Configuration
+
+The application requires API keys for AI functionality:
+
+1. **OpenAI API Key**: Required for LLM and embedding functionality
+2. **Tavily API Key**: Required for web search capabilities
+
+**Setup Options:**
+- **Admin Page**: Use the Admin page in the application (recommended)
+- **Config File**: Copy `config/admin_config.template.json` to `config/admin_config.json` and add your keys
+- **Environment Variables**: Set `OPENAI_API_KEY` and `TAVILY_API_KEY` environment variables
+
+**Security Note**: The `config/admin_config.json` file is excluded from version control to protect your API keys.
 
 ### Manual Setup (Alternative)
 

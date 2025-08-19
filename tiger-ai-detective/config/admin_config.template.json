@@ -1,0 +1,4 @@
+{
+  "openai_api_key": "your-openai-api-key-here",
+  "tavily_api_key": "your-tavily-api-key-here"
+}
