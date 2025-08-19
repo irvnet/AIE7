@@ -166,6 +166,16 @@ def admin_page():
     # Check if system is already initialized
     if st.session_state.get("system_initialized", False):
         st.success("✅ System is initialized and ready")
+        
+        # Show RAG system status
+        if hasattr(st.session_state, 'rag_system'):
+            rag_status = st.session_state.rag_system.get_system_status()
+            st.info(f"🤖 RAG System: {rag_status['has_vectorstore']} vectorstore, {rag_status['has_llm']} LLM")
+        
+        # Show Architecture Agent status
+        if hasattr(st.session_state, 'architecture_agent'):
+            arch_status = st.session_state.architecture_agent.get_system_status()
+            st.info(f"🏗️ Architecture Agent: {arch_status['catalog_sources']} catalog sources, {arch_status['has_web_search']} web search")
     else:
         st.warning("⚠️ System needs initialization")
     
@@ -296,12 +306,20 @@ def initialize_rag_system_with_progress(admin: AdminManager, progress_bar, statu
         result = rag_system.initialize(openai_api_key, progress_callback=update_progress)
         
         if result["success"]:
-            # Step 5: Final setup (90-100%)
-            status_text.text("✅ Finalizing system setup...")
+            # Step 5: Initialize Architecture Agent (90-95%)
+            status_text.text("🏗️ Initializing Architecture Agent...")
             progress_bar.progress(0.9)
+            
+            from app.architecture_agent import ArchitectureAgent
+            architecture_agent = ArchitectureAgent(openai_api_key, tavily_api_key)
+            
+            # Step 6: Final setup (95-100%)
+            status_text.text("✅ Finalizing system setup...")
+            progress_bar.progress(0.95)
             
             # Store in session state
             st.session_state.rag_system = rag_system
+            st.session_state.architecture_agent = architecture_agent
             st.session_state.system_initialized = True
             
             # Complete

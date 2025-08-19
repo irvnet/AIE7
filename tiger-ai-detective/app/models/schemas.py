@@ -90,6 +90,7 @@ class Case(Base):
     status = Column(String(50), default="Open")  # Open, Research, Customer Call, Resolved
     research_notes = Column(Text)
     ai_recommendations = Column(Text)
+    ai_recommendations_generated_at = Column(DateTime(timezone=True))
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

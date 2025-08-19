@@ -6,7 +6,15 @@
     "url": "https://www.ibm.com/docs/en/ibm-mq",
     "format": "HTML (PDF export available)",
     "type": "primary",
-    "downloadable_pdf": false
+    "downloadable_pdf": false,
+    "doc_type": "product-doc",
+    "topic": "reference",
+    "product_component": null,
+    "version_range": null,
+    "pattern_tags": [],
+    "stability": "version-specific",
+    "last_updated": null,
+    "license_ok": true
   },
   {
     "product": "IBM MQ",
@@ -15,7 +23,15 @@
     "url": "https://www.ibm.com/docs/en/ibm-mq/9.2.x?topic=SSFKSJ_9.2.0/com.ibm.mq.pro.doc/q001040_.html",
     "format": "PDF",
     "type": "primary",
-    "downloadable_pdf": true
+    "downloadable_pdf": true,
+    "doc_type": "product-doc",
+    "topic": "reference",
+    "product_component": null,
+    "version_range": null,
+    "pattern_tags": [],
+    "stability": "version-specific",
+    "last_updated": null,
+    "license_ok": true
   },
   {
     "product": "IBM MQ",
@@ -24,7 +40,15 @@
     "url": "https://www.redbooks.ibm.com/redpapers/pdfs/redp0021.pdf",
     "format": "PDF",
     "type": "reference",
-    "downloadable_pdf": true
+    "downloadable_pdf": true,
+    "doc_type": "redpaper",
+    "topic": "reference",
+    "product_component": null,
+    "version_range": null,
+    "pattern_tags": [],
+    "stability": "stable",
+    "last_updated": null,
+    "license_ok": true
   },
   {
     "product": "IBM MQ",
@@ -33,7 +57,15 @@
     "url": "https://www.redbooks.ibm.com/redbooks/pdfs/sg248218.pdf",
     "format": "PDF",
     "type": "reference",
-    "downloadable_pdf": true
+    "downloadable_pdf": true,
+    "doc_type": "redbook",
+    "topic": "performance",
+    "product_component": null,
+    "version_range": null,
+    "pattern_tags": [],
+    "stability": "stable",
+    "last_updated": null,
+    "license_ok": true
   },
   {
     "product": "IBM MQ",
@@ -42,7 +74,15 @@
     "url": "https://www.ibm.com/support/pages/product/ibm-mq",
     "format": "HTML",
     "type": "support",
-    "downloadable_pdf": false
+    "downloadable_pdf": false,
+    "doc_type": "support",
+    "topic": "troubleshooting",
+    "product_component": null,
+    "version_range": null,
+    "pattern_tags": [],
+    "stability": "version-specific",
+    "last_updated": null,
+    "license_ok": true
   },
   {
     "product": "WebSphere Application Server",
@@ -51,7 +91,15 @@
     "url": "https://www.ibm.com/docs/en/was/9.0.5?topic=websphere-application-server-overview",
     "format": "HTML (PDF export available)",
     "type": "primary",
-    "downloadable_pdf": false
+    "downloadable_pdf": false,
+    "doc_type": "product-doc",
+    "topic": "reference",
+    "product_component": null,
+    "version_range": null,
+    "pattern_tags": [],
+    "stability": "version-specific",
+    "last_updated": null,
+    "license_ok": true
   },
   {
     "product": "WebSphere Application Server",
@@ -60,7 +108,15 @@
     "url": "https://www.redbooks.ibm.com/redbooks/pdfs/sg248056.pdf",
     "format": "PDF",
     "type": "reference",
-    "downloadable_pdf": true
+    "downloadable_pdf": true,
+    "doc_type": "redbook",
+    "topic": "admin-config",
+    "product_component": null,
+    "version_range": null,
+    "pattern_tags": [],
+    "stability": "stable",
+    "last_updated": null,
+    "license_ok": true
   },
   {
     "product": "WebSphere Application Server",
@@ -69,7 +125,15 @@
     "url": "https://www.redbooks.ibm.com/redbooks/pdfs/sg247971.pdf",
     "format": "PDF",
     "type": "reference",
-    "downloadable_pdf": true
+    "downloadable_pdf": true,
+    "doc_type": "redbook",
+    "topic": "admin-config",
+    "product_component": null,
+    "version_range": null,
+    "pattern_tags": [],
+    "stability": "stable",
+    "last_updated": null,
+    "license_ok": true
   },
   {
     "product": "IBM Db2 (z/OS)",
@@ -78,7 +142,15 @@
     "url": "https://www.ibm.com/docs/en/db2-for-zos/13.0.0",
     "format": "HTML (PDF export available)",
     "type": "primary",
-    "downloadable_pdf": false
+    "downloadable_pdf": false,
+    "doc_type": "product-doc",
+    "topic": "reference",
+    "product_component": null,
+    "version_range": null,
+    "pattern_tags": [],
+    "stability": "version-specific",
+    "last_updated": null,
+    "license_ok": true
   },
   {
     "product": "IBM Db2 (z/OS)",
@@ -87,7 +159,15 @@
     "url": "https://www.redbooks.ibm.com/redbooks/pdfs/sg248536.pdf",
     "format": "PDF",
     "type": "reference",
-    "downloadable_pdf": true
+    "downloadable_pdf": true,
+    "doc_type": "redbook",
+    "topic": "performance",
+    "product_component": null,
+    "version_range": null,
+    "pattern_tags": [],
+    "stability": "stable",
+    "last_updated": null,
+    "license_ok": true
   },
   {
     "product": "IBM Db2 (z/OS)",
@@ -96,7 +176,15 @@
     "url": "https://www.redbooks.ibm.com/redbooks/pdfs/sg248383.pdf",
     "format": "PDF",
     "type": "reference",
-    "downloadable_pdf": true
+    "downloadable_pdf": true,
+    "doc_type": "redbook",
+    "topic": "reference",
+    "product_component": null,
+    "version_range": null,
+    "pattern_tags": [],
+    "stability": "stable",
+    "last_updated": null,
+    "license_ok": true
   },
   {
     "product": "IBM App Connect Enterprise",
@@ -105,7 +193,15 @@
     "url": "https://www.ibm.com/docs/en/app-connect/12.0.x?topic=enterprise-get-started-app-connect",
     "format": "HTML (PDF export available in sections)",
     "type": "primary",
-    "downloadable_pdf": false
+    "downloadable_pdf": false,
+    "doc_type": "product-doc",
+    "topic": "reference",
+    "product_component": null,
+    "version_range": null,
+    "pattern_tags": [],
+    "stability": "version-specific",
+    "last_updated": null,
+    "license_ok": true
   },
   {
     "product": "IBM App Connect Enterprise",
@@ -114,7 +210,15 @@
     "url": "https://www.ibm.com/docs/en/app-connect/11.0.0",
     "format": "HTML (PDF export available in sections)",
     "type": "primary",
-    "downloadable_pdf": false
+    "downloadable_pdf": false,
+    "doc_type": "product-doc",
+    "topic": "reference",
+    "product_component": null,
+    "version_range": null,
+    "pattern_tags": [],
+    "stability": "version-specific",
+    "last_updated": null,
+    "license_ok": true
   },
   {
     "product": "IBM App Connect (Hybrid Integration)",
@@ -123,7 +227,15 @@
     "url": "https://www.redbooks.ibm.com/redbooks/pdfs/sg248351.pdf",
     "format": "PDF",
     "type": "reference",
-    "downloadable_pdf": true
+    "downloadable_pdf": true,
+    "doc_type": "redbook",
+    "topic": "reference",
+    "product_component": null,
+    "version_range": null,
+    "pattern_tags": [],
+    "stability": "stable",
+    "last_updated": null,
+    "license_ok": true
   },
   {
     "product": "IBM API Connect",
@@ -132,7 +244,15 @@
     "url": "https://www.ibm.com/docs/en/api-connect/saas",
     "format": "HTML (PDF export available in some sections)",
     "type": "primary",
-    "downloadable_pdf": false
+    "downloadable_pdf": false,
+    "doc_type": "product-doc",
+    "topic": "reference",
+    "product_component": null,
+    "version_range": null,
+    "pattern_tags": [],
+    "stability": "version-specific",
+    "last_updated": null,
+    "license_ok": true
   },
   {
     "product": "IBM API Connect",
@@ -141,7 +261,15 @@
     "url": "https://www.ibm.com/docs/en/api-connect/10.0.x_cd?topic=api-connect-overview",
     "format": "HTML",
     "type": "primary",
-    "downloadable_pdf": false
+    "downloadable_pdf": false,
+    "doc_type": "product-doc",
+    "topic": "reference",
+    "product_component": null,
+    "version_range": null,
+    "pattern_tags": [],
+    "stability": "version-specific",
+    "last_updated": null,
+    "license_ok": true
   },
   {
     "product": "IBM API Connect",
@@ -150,7 +278,15 @@
     "url": "https://www.redbooks.ibm.com/redpapers/pdfs/redp5349.pdf",
     "format": "PDF",
     "type": "reference",
-    "downloadable_pdf": true
+    "downloadable_pdf": true,
+    "doc_type": "redpaper",
+    "topic": "install-config",
+    "product_component": null,
+    "version_range": null,
+    "pattern_tags": [],
+    "stability": "stable",
+    "last_updated": null,
+    "license_ok": true
   },
   {
     "product": "IBM API Connect",
@@ -159,7 +295,15 @@
     "url": "https://www.redbooks.ibm.com/redpapers/pdfs/redp5350.pdf",
     "format": "PDF",
     "type": "reference",
-    "downloadable_pdf": true
+    "downloadable_pdf": true,
+    "doc_type": "redpaper",
+    "topic": "install-config",
+    "product_component": null,
+    "version_range": null,
+    "pattern_tags": [],
+    "stability": "stable",
+    "last_updated": null,
+    "license_ok": true
   },
   {
     "product": "Red Hat OpenShift",
@@ -168,7 +312,15 @@
     "url": "https://docs.openshift.com/",
     "format": "HTML (PDF export available per guide)",
     "type": "primary",
-    "downloadable_pdf": false
+    "downloadable_pdf": false,
+    "doc_type": "product-doc",
+    "topic": "reference",
+    "product_component": null,
+    "version_range": null,
+    "pattern_tags": [],
+    "stability": "version-specific",
+    "last_updated": null,
+    "license_ok": true
   },
   {
     "product": "OpenShift on IBM Cloud",
@@ -177,6 +329,163 @@
     "url": "https://cloud.ibm.com/docs/openshift?topic=openshift-overview",
     "format": "HTML",
     "type": "primary",
-    "downloadable_pdf": false
+    "downloadable_pdf": false,
+    "doc_type": "product-doc",
+    "topic": "reference",
+    "product_component": null,
+    "version_range": null,
+    "pattern_tags": [],
+    "stability": "version-specific",
+    "last_updated": null,
+    "license_ok": true
+  },
+  {
+    "product": "IBM API Connect + DataPower",
+    "category": "Product Documentation",
+    "title": "API Connect Gateway (DataPower) - Architecture and Policies",
+    "url": "https://www.ibm.com/docs/en/api-connect/10.0.x?topic=gateway-architecture",
+    "format": "HTML",
+    "type": "primary",
+    "downloadable_pdf": false,
+    "doc_type": "product-doc",
+    "topic": "reference",
+    "product_component": "Gateway (DataPower)",
+    "version_range": "10.0.x",
+    "pattern_tags": [
+      "api-led",
+      "security",
+      "policy"
+    ],
+    "stability": "version-specific",
+    "last_updated": null,
+    "license_ok": true
+  },
+  {
+    "product": "IBM DataPower Gateway",
+    "category": "Product Documentation",
+    "title": "DataPower Gateway Documentation Hub (policies, TLS, OAuth)",
+    "url": "https://www.ibm.com/docs/en/datapower-gateway",
+    "format": "HTML",
+    "type": "primary",
+    "downloadable_pdf": false,
+    "doc_type": "product-doc",
+    "topic": "reference",
+    "product_component": "Gateway",
+    "version_range": null,
+    "pattern_tags": [
+      "security",
+      "mTLS",
+      "jwt",
+      "waf"
+    ],
+    "stability": "version-specific",
+    "last_updated": null,
+    "license_ok": true
+  },
+  {
+    "product": "IBM Cloud Pak for Integration (CP4I)",
+    "category": "Product Documentation",
+    "title": "CP4I on OpenShift - Architecture and Capabilities",
+    "url": "https://www.ibm.com/docs/en/cloud-paks/cp-integration",
+    "format": "HTML",
+    "type": "primary",
+    "downloadable_pdf": false,
+    "doc_type": "product-doc",
+    "topic": "reference",
+    "product_component": "Cloud Pak for Integration",
+    "version_range": null,
+    "pattern_tags": [
+      "openshift",
+      "operators",
+      "ha-dr",
+      "hybrid"
+    ],
+    "stability": "version-specific",
+    "last_updated": null,
+    "license_ok": true
+  },
+  {
+    "product": "IBM MQ on OpenShift (Operator)",
+    "category": "Product Documentation",
+    "title": "IBM MQ Operator for OpenShift - Install and Configure",
+    "url": "https://www.ibm.com/docs/en/ibm-mq/latest?topic=containerizing-mq-operator",
+    "format": "HTML",
+    "type": "primary",
+    "downloadable_pdf": false,
+    "doc_type": "product-doc",
+    "topic": "admin-config",
+    "product_component": "MQ Operator",
+    "version_range": "Latest",
+    "pattern_tags": [
+      "openshift",
+      "operator",
+      "ha-dr"
+    ],
+    "stability": "version-specific",
+    "last_updated": null,
+    "license_ok": true
+  },
+  {
+    "product": "IBM App Connect Enterprise on OpenShift (Operator)",
+    "category": "Product Documentation",
+    "title": "ACE Operator for OpenShift - Install and Configure",
+    "url": "https://www.ibm.com/docs/en/app-connect/12.0.x?topic=enterprise-installing-ace-operator",
+    "format": "HTML",
+    "type": "primary",
+    "downloadable_pdf": false,
+    "doc_type": "product-doc",
+    "topic": "admin-config",
+    "product_component": "ACE Operator",
+    "version_range": "12.0.x",
+    "pattern_tags": [
+      "openshift",
+      "operator"
+    ],
+    "stability": "version-specific",
+    "last_updated": null,
+    "license_ok": true
+  },
+  {
+    "product": "API Connect on OpenShift (Operator)",
+    "category": "Product Documentation",
+    "title": "API Connect Operator on OpenShift - Install and Day-2 Operations",
+    "url": "https://www.ibm.com/docs/en/api-connect/10.0.x?topic=connect-installing-api-on-openshift",
+    "format": "HTML",
+    "type": "primary",
+    "downloadable_pdf": false,
+    "doc_type": "product-doc",
+    "topic": "admin-config",
+    "product_component": "APIC Operator",
+    "version_range": "10.0.x",
+    "pattern_tags": [
+      "openshift",
+      "operator",
+      "gitops"
+    ],
+    "stability": "version-specific",
+    "last_updated": null,
+    "license_ok": true
+  },
+  {
+    "product": "IBM Architecture Center",
+    "category": "Product Documentation",
+    "title": "Hybrid Integration Reference Architectures (API-led, Event-driven, MQ/ACE)",
+    "url": "https://www.ibm.com/architecture",
+    "format": "HTML",
+    "type": "primary",
+    "downloadable_pdf": false,
+    "doc_type": "product-doc",
+    "topic": "reference",
+    "product_component": "Reference Architectures",
+    "version_range": null,
+    "pattern_tags": [
+      "api-led",
+      "event-driven",
+      "hybrid",
+      "security"
+    ],
+    "stability": "stable",
+    "last_updated": null,
+    "license_ok": true
   }
 ]

@@ -312,6 +312,33 @@ class TigerTeamRAGSystem:
             logger.error(f"Error getting recommendations: {str(e)}")
             return f"Error generating recommendations: {str(e)}"
     
+    def get_architecture_guidance(self, architecture_question: str) -> str:
+        """Get specialized IBM architecture and integration guidance"""
+        if not self.is_initialized:
+            return "RAG system not initialized. Please check your OpenAI API key and try again."
+        
+        try:
+            # Create specialized architecture query
+            query = f"""
+            IBM Architecture Question: {architecture_question}
+            
+            Focus on:
+            - Enterprise architecture patterns
+            - System integration best practices
+            - Performance optimization strategies
+            - Deployment and scalability patterns
+            - Security and compliance considerations
+            """
+            
+            # Use specialized architecture research
+            guidance = self._get_architecture_recommendations(query, architecture_question)
+            
+            return guidance
+            
+        except Exception as e:
+            logger.error(f"Error getting architecture guidance: {str(e)}")
+            return f"Error generating architecture guidance: {str(e)}"
+    
     def _get_comprehensive_recommendations(self, query: str, case_info: Dict) -> str:
         """Get recommendations using multiple tools"""
         try:
@@ -360,6 +387,85 @@ class TigerTeamRAGSystem:
         except Exception as e:
             logger.error(f"Error in comprehensive recommendations: {str(e)}")
             return f"Error generating comprehensive recommendations: {str(e)}"
+    
+    def _get_architecture_recommendations(self, query: str, architecture_question: str) -> str:
+        """Get specialized architecture and integration guidance"""
+        try:
+            # 1. Search local IBM documentation for architecture patterns
+            local_results = self.search_documentation(query, max_results=5)
+            
+            # 2. Search web for current IBM architecture best practices
+            web_results = self.search_web(f"IBM enterprise architecture {architecture_question}")
+            
+            # 3. Search IBM-specific architecture resources
+            ibm_results = self.search_ibm_resources(f"IBM architecture patterns {architecture_question}", "Architecture")
+            
+            # 4. Combine and synthesize results
+            combined_context = self._combine_search_results(local_results, web_results, ibm_results)
+            
+            # 5. Generate specialized architecture guidance
+            architecture_prompt = f"""
+            As an IBM Enterprise Architecture Specialist, provide comprehensive guidance for this architecture question:
+
+            QUESTION: {architecture_question}
+
+            RESEARCH CONTEXT:
+            LOCAL IBM DOCUMENTATION:
+            {combined_context['local']}
+
+            WEB SEARCH RESULTS:
+            {combined_context['web']}
+
+            IBM-SPECIFIC RESOURCES:
+            {combined_context['ibm']}
+
+            Please provide a structured architecture guidance response with:
+
+            🏗️ **ARCHITECTURAL OVERVIEW**
+            - High-level architectural approach
+            - Key components and their relationships
+            - Integration patterns to consider
+
+            🔗 **INTEGRATION STRATEGY**
+            - How to connect the IBM products
+            - Communication patterns and protocols
+            - Data flow and messaging architecture
+
+            ⚡ **PERFORMANCE CONSIDERATIONS**
+            - Scalability patterns
+            - Performance optimization strategies
+            - Resource allocation recommendations
+
+            ☁️ **DEPLOYMENT ARCHITECTURE**
+            - Deployment patterns (on-prem, cloud, hybrid)
+            - Infrastructure requirements
+            - High availability and disaster recovery
+
+            🔒 **SECURITY & COMPLIANCE**
+            - Security architecture patterns
+            - Authentication and authorization strategies
+            - Compliance considerations
+
+            📋 **IMPLEMENTATION ROADMAP**
+            - Phased implementation approach
+            - Key milestones and deliverables
+            - Risk mitigation strategies
+
+            📚 **REFERENCE ARCHITECTURES**
+            - Relevant IBM reference architectures
+            - Best practice documentation
+            - Additional resources for implementation
+
+            Focus on enterprise-grade, production-ready architectural patterns that follow IBM best practices.
+            """
+            
+            # Use LLM to generate specialized architecture guidance
+            response = self.llm.invoke(architecture_prompt)
+            return response.content
+            
+        except Exception as e:
+            logger.error(f"Error in architecture recommendations: {str(e)}")
+            return f"Error generating architecture recommendations: {str(e)}"
     
     def search_web(self, query: str) -> List[str]:
         """Search the web for current information"""
