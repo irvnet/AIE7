@@ -176,28 +176,27 @@ def admin_page():
         
         if not openai_key:
             st.error("❌ Please configure OpenAI API key first")
-        elif not tavily_key:
-            st.warning("⚠️ Tavily API key recommended for web search capabilities")
-            with st.spinner("Initializing system with local docs only..."):
-                try:
-                    success = initialize_rag_system(admin)
-                    if success:
-                        st.success("✅ System initialized successfully!")
-                        st.rerun()
-                    else:
-                        st.error("❌ Failed to initialize system")
-                except Exception as e:
-                    st.error(f"❌ Error initializing system: {str(e)}")
         else:
-            with st.spinner("Initializing system with full capabilities..."):
-                try:
-                    success = initialize_rag_system(admin)
-                    if success:
+            # Create progress container
+            progress_container = st.container()
+            status_container = st.container()
+            
+            with progress_container:
+                progress_bar = st.progress(0)
+                status_text = st.empty()
+            
+            try:
+                # Initialize with progress updates
+                success = initialize_rag_system_with_progress(admin, progress_bar, status_text)
+                if success:
+                    with status_container:
                         st.success("✅ System initialized successfully!")
-                        st.rerun()
-                    else:
+                    st.rerun()
+                else:
+                    with status_container:
                         st.error("❌ Failed to initialize system")
-                except Exception as e:
+            except Exception as e:
+                with status_container:
                     st.error(f"❌ Error initializing system: {str(e)}")
     
     # Quick Actions
@@ -246,6 +245,64 @@ def initialize_rag_system(admin: AdminManager):
             return True
         else:
             st.error(f"Failed to initialize RAG system: {result['message']}")
+            return False
+            
+    except Exception as e:
+        st.error(f"Error initializing system: {str(e)}")
+        return False
+
+def initialize_rag_system_with_progress(admin: AdminManager, progress_bar, status_text):
+    """Initialize the RAG system and database with progress updates"""
+    try:
+        # Step 1: Create database tables (10%)
+        status_text.text("📊 Creating database tables...")
+        progress_bar.progress(0.1)
+        from app.models.database import Base, engine
+        Base.metadata.create_all(bind=engine)
+        
+        # Step 2: Get API keys (20%)
+        status_text.text("🔑 Configuring API keys...")
+        progress_bar.progress(0.2)
+        openai_api_key = admin.get_api_key("openai_api_key")
+        tavily_api_key = admin.get_api_key("tavily_api_key")
+        
+        if not openai_api_key:
+            st.error("Please configure your OpenAI API key first.")
+            return False
+        
+        # Set environment variables for RAG system
+        os.environ["OPENAI_API_KEY"] = openai_api_key
+        if tavily_api_key:
+            os.environ["TAVILY_API_KEY"] = tavily_api_key
+        
+        # Step 3: Initialize RAG system (30%)
+        status_text.text("🤖 Initializing RAG system...")
+        progress_bar.progress(0.3)
+        from app.rag_system import TigerTeamRAGSystem
+        rag_system = TigerTeamRAGSystem()
+        
+        # Step 4: Load documents with progress updates (30-90%)
+        status_text.text("📚 Loading IBM documentation...")
+        progress_bar.progress(0.4)
+        
+        # Initialize with progress callback
+        result = rag_system.initialize(openai_api_key)
+        
+        if result["success"]:
+            # Step 5: Final setup (90-100%)
+            status_text.text("✅ Finalizing system setup...")
+            progress_bar.progress(0.9)
+            
+            # Store in session state
+            st.session_state.rag_system = rag_system
+            st.session_state.system_initialized = True
+            
+            # Complete
+            status_text.text("🎉 System initialization complete!")
+            progress_bar.progress(1.0)
+            return True
+        else:
+            st.error(f"Failed to initialize RAG system: {result['error']}")
             return False
             
     except Exception as e:
