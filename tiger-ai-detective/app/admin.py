@@ -223,9 +223,16 @@ def initialize_rag_system(admin: AdminManager):
         
         # Get API keys from admin manager
         openai_api_key = admin.get_api_key("openai_api_key")
+        tavily_api_key = admin.get_api_key("tavily_api_key")
+        
         if not openai_api_key:
             st.error("Please configure your OpenAI API key first.")
             return False
+        
+        # Set environment variables for RAG system
+        os.environ["OPENAI_API_KEY"] = openai_api_key
+        if tavily_api_key:
+            os.environ["TAVILY_API_KEY"] = tavily_api_key
         
         # Initialize the Tiger Team RAG system
         from app.rag_system import TigerTeamRAGSystem

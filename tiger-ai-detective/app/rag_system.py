@@ -91,8 +91,18 @@ class TigerTeamRAGSystem:
             # Initialize LLM
             self.llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.1)
             
-            # Initialize web search tool
-            self.tavily_tool = TavilySearchResults(max_results=5)
+            # Initialize web search tool (optional)
+            self.tavily_tool = None
+            try:
+                # Check if Tavily API key is available
+                tavily_api_key = os.getenv("TAVILY_API_KEY")
+                if tavily_api_key:
+                    self.tavily_tool = TavilySearchResults(max_results=5, api_key=tavily_api_key)
+                    logger.info("Tavily web search tool initialized")
+                else:
+                    logger.warning("Tavily API key not found - web search will be disabled")
+            except Exception as e:
+                logger.warning(f"Failed to initialize Tavily tool: {str(e)} - web search will be disabled")
             
             # Load and process IBM documentation
             logger.info("Loading IBM documentation PDFs...")
