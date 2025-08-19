@@ -286,7 +286,14 @@ def initialize_rag_system_with_progress(admin: AdminManager, progress_bar, statu
         progress_bar.progress(0.4)
         
         # Initialize with progress callback
-        result = rag_system.initialize(openai_api_key)
+        def update_progress(progress, message):
+            try:
+                progress_bar.progress(progress)
+                status_text.text(message)
+            except:
+                pass  # Ignore errors if widgets are no longer available
+        
+        result = rag_system.initialize(openai_api_key, progress_callback=update_progress)
         
         if result["success"]:
             # Step 5: Final setup (90-100%)

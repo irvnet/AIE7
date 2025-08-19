@@ -62,10 +62,13 @@ class TigerTeamRAGSystem:
         self.tavily_tool = None
         self.is_initialized = False
         
-    def initialize(self, openai_api_key: str) -> Dict[str, Any]:
-        """Initialize the RAG system with IBM documentation"""
+    def initialize(self, openai_api_key: str, progress_callback=None) -> Dict[str, Any]:
+        """Initialize the RAG system with IBM documentation and optional progress callback"""
         try:
             logger.info("Initializing Tiger Team RAG system...")
+            
+            if progress_callback:
+                progress_callback(0.05, "🔧 Setting up OpenAI API...")
             
             # Set OpenAI API key
             os.environ["OPENAI_API_KEY"] = openai_api_key
@@ -76,6 +79,9 @@ class TigerTeamRAGSystem:
                     "success": False,
                     "error": "OpenAI API key not found. Set OPENAI_API_KEY environment variable."
                 }
+            
+            if progress_callback:
+                progress_callback(0.1, "🧠 Initializing embedding model...")
             
             # Initialize embedding model
             self.embedding_model = OpenAIEmbeddings(model=self.config.embedding_model)
@@ -88,8 +94,14 @@ class TigerTeamRAGSystem:
                     "error": "Failed to create test embedding"
                 }
             
+            if progress_callback:
+                progress_callback(0.15, "🤖 Initializing language model...")
+            
             # Initialize LLM
             self.llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.1)
+            
+            if progress_callback:
+                progress_callback(0.2, "🔍 Setting up web search tools...")
             
             # Initialize web search tool (optional)
             self.tavily_tool = None
@@ -103,6 +115,9 @@ class TigerTeamRAGSystem:
                     logger.warning("Tavily API key not found - web search will be disabled")
             except Exception as e:
                 logger.warning(f"Failed to initialize Tavily tool: {str(e)} - web search will be disabled")
+            
+            if progress_callback:
+                progress_callback(0.25, "📚 Loading IBM documentation PDFs...")
             
             # Load and process IBM documentation
             logger.info("Loading IBM documentation PDFs...")
@@ -128,6 +143,9 @@ class TigerTeamRAGSystem:
                 
             logger.info(f"Loaded {len(documents)} documents")
             
+            if progress_callback:
+                progress_callback(0.4, f"📄 Processing {len(documents)} documents...")
+            
             # Chunk documents with proven strategy
             def tiktoken_len(text):
                 tokens = tiktoken.encoding_for_model("gpt-4o").encode(text)
@@ -141,8 +159,14 @@ class TigerTeamRAGSystem:
             chunks = text_splitter.split_documents(documents)
             logger.info(f"Created {len(chunks)} chunks from documents")
             
+            if progress_callback:
+                progress_callback(0.6, f"✂️ Created {len(chunks)} text chunks...")
+            
             # Create vector store
             logger.info("Creating vector database...")
+            if progress_callback:
+                progress_callback(0.7, "🗄️ Creating vector database...")
+            
             self.vectorstore = Qdrant.from_documents(
                 documents=chunks,
                 embedding=self.embedding_model,
@@ -150,11 +174,21 @@ class TigerTeamRAGSystem:
                 collection_name=self.config.collection_name
             )
             
+            if progress_callback:
+                progress_callback(0.85, "🔗 Setting up RAG processing graph...")
+            
             # Create RAG graph
             self._create_rag_graph()
             
+            if progress_callback:
+                progress_callback(0.95, "✅ Finalizing system setup...")
+            
             self.is_initialized = True
             logger.info("Tiger Team RAG system initialized successfully!")
+            
+            if progress_callback:
+                progress_callback(1.0, "🎉 System initialization complete!")
+            
             return {
                 "success": True,
                 "message": f"RAG system initialized with {len(chunks)} chunks from {len(documents)} documents"
